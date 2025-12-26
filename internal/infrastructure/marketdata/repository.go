@@ -71,7 +71,7 @@ func (r *Repository) AddTrades(ctx context.Context, trades []domain.Trade) error
 	if len(trades) == 0 {
 		return nil
 	}
-	batch := &pgx.Batch{}
+	rows := make([][]interface{}, 0, len(trades))
 	for i := range trades {
 		if trades[i].ID == uuid.Nil {
 			trades[i].ID = uuid.New()
@@ -80,7 +80,7 @@ func (r *Repository) AddTrades(ctx context.Context, trades []domain.Trade) error
 		if err != nil {
 			return err
 		}
-		batch.Queue(insertTradeQuery,
+		rows = append(rows, []interface{}{
 			trades[i].ID,
 			trades[i].InstrumentUID,
 			trades[i].Side,
@@ -88,16 +88,15 @@ func (r *Repository) AddTrades(ctx context.Context, trades []domain.Trade) error
 			trades[i].QuantityLots,
 			trades[i].TradedAt,
 			meta,
-		)
+		})
 	}
-	br := r.pool.SendBatch(ctx, batch)
-	defer br.Close()
-	for range trades {
-		if _, err := br.Exec(); err != nil {
-			return err
-		}
-	}
-	return nil
+	_, err := r.pool.CopyFrom(
+		ctx,
+		pgx.Identifier{"trades"},
+		[]string{"trade_id", "instrument_uid", "side", "price", "quantity_lots", "traded_at", "metadata"},
+		pgx.CopyFromRows(rows),
+	)
+	return err
 }
 
 func (r *Repository) GetTradesBetween(ctx context.Context, instrumentUID uuid.UUID, from, to time.Time) ([]domain.Trade, error) {
@@ -216,7 +215,7 @@ func (r *Repository) AddCandles(ctx context.Context, candles []domain.Candle) er
 	if len(candles) == 0 {
 		return nil
 	}
-	batch := &pgx.Batch{}
+	rows := make([][]interface{}, 0, len(candles))
 	for i := range candles {
 		if candles[i].ID == uuid.Nil {
 			candles[i].ID = uuid.New()
@@ -225,7 +224,7 @@ func (r *Repository) AddCandles(ctx context.Context, candles []domain.Candle) er
 		if err != nil {
 			return err
 		}
-		batch.Queue(insertCandleQuery,
+		rows = append(rows, []interface{}{
 			candles[i].ID,
 			candles[i].InstrumentUID,
 			candles[i].IntervalSeconds,
@@ -239,16 +238,29 @@ func (r *Repository) AddCandles(ctx context.Context, candles []domain.Candle) er
 			nullableInt64(candles[i].VolumeSellLots),
 			candles[i].LastTradeAt,
 			meta,
-		)
+		})
 	}
-	br := r.pool.SendBatch(ctx, batch)
-	defer br.Close()
-	for range candles {
-		if _, err := br.Exec(); err != nil {
-			return err
-		}
-	}
-	return nil
+	_, err := r.pool.CopyFrom(
+		ctx,
+		pgx.Identifier{"candles"},
+		[]string{
+			"candle_id",
+			"instrument_uid",
+			"interval_seconds",
+			"period_start",
+			"open",
+			"high",
+			"low",
+			"close",
+			"volume_lots",
+			"volume_buy_lots",
+			"volume_sell_lots",
+			"last_trade_at",
+			"metadata",
+		},
+		pgx.CopyFromRows(rows),
+	)
+	return err
 }
 
 func (r *Repository) GetCandlesBetween(ctx context.Context, instrumentUID uuid.UUID, from, to time.Time, intervalSeconds int64) ([]domain.Candle, error) {
@@ -398,7 +410,7 @@ func (r *Repository) AddOrderBookSnapshots(ctx context.Context, snapshots []doma
 	if len(snapshots) == 0 {
 		return nil
 	}
-	batch := &pgx.Batch{}
+	rows := make([][]interface{}, 0, len(snapshots))
 	for i := range snapshots {
 		if snapshots[i].ID == uuid.Nil {
 			snapshots[i].ID = uuid.New()
@@ -415,7 +427,7 @@ func (r *Repository) AddOrderBookSnapshots(ctx context.Context, snapshots []doma
 		if err != nil {
 			return err
 		}
-		batch.Queue(insertOrderBookQuery,
+		rows = append(rows, []interface{}{
 			snapshots[i].ID,
 			snapshots[i].InstrumentUID,
 			snapshots[i].SnapshotAt,
@@ -423,16 +435,23 @@ func (r *Repository) AddOrderBookSnapshots(ctx context.Context, snapshots []doma
 			bidsJSON,
 			asksJSON,
 			meta,
-		)
+		})
 	}
-	br := r.pool.SendBatch(ctx, batch)
-	defer br.Close()
-	for range snapshots {
-		if _, err := br.Exec(); err != nil {
-			return err
-		}
-	}
-	return nil
+	_, err := r.pool.CopyFrom(
+		ctx,
+		pgx.Identifier{"order_book_snapshots"},
+		[]string{
+			"snapshot_id",
+			"instrument_uid",
+			"snapshot_at",
+			"depth",
+			"bids",
+			"asks",
+			"metadata",
+		},
+		pgx.CopyFromRows(rows),
+	)
+	return err
 }
 
 func (r *Repository) GetOrderBookSnapshotsBetween(ctx context.Context, instrumentUID uuid.UUID, from, to time.Time, depth int32) ([]domain.OrderBookSnapshot, error) {

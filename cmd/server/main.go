@@ -12,6 +12,7 @@ import (
 	appinstruments "main/internal/application/service/instruments"
 	appmarketdata "main/internal/application/service/marketdata"
 	"main/internal/config"
+	"main/internal/infrastructure/broker"
 	infrainstruments "main/internal/infrastructure/instruments"
 	inframarketdata "main/internal/infrastructure/marketdata"
 	infrahttp "main/internal/interfaces/http"
@@ -62,6 +63,21 @@ func main() {
 
 	instrumentService := appinstruments.NewService(instrumentRepo)
 	marketdataService := appmarketdata.NewService(marketdataRepo)
+
+	rabbitConsumer, err := broker.NewConsumer(cfg.RabbitMQ, marketdataService, logger)
+	if err != nil {
+		logger.Fatalf("failed to init rabbitmq consumer: %v", err)
+	}
+	if err := rabbitConsumer.Start(ctx); err != nil {
+		logger.Fatalf("failed to start rabbitmq consumer: %v", err)
+	}
+	defer func() {
+		shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer shutdownCancel()
+		if err := rabbitConsumer.Close(shutdownCtx); err != nil {
+			logger.Errorf("rabbitmq consumer shutdown error: %v", err)
+		}
+	}()
 
 	cacheTTL := time.Duration(cfg.Cache.TTLSeconds) * time.Second
 	handler := infrahttp.NewHandler(instrumentService, marketdataService, redisClient, cacheTTL)

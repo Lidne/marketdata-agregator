@@ -5,17 +5,25 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/joho/godotenv"
 )
 
 const (
-	defaultEnv             = "development"
-	defaultHTTPHost        = "0.0.0.0"
-	defaultHTTPPort        = 8080
-	defaultRedisAddr       = "localhost:6379"
-	defaultRedisDB         = 0
-	defaultCacheTTLSeconds = 30
+	defaultEnv                = "development"
+	defaultHTTPHost           = "0.0.0.0"
+	defaultHTTPPort           = 8080
+	defaultRedisAddr          = "localhost:6379"
+	defaultRedisDB            = 0
+	defaultCacheTTLSeconds    = 30
+	defaultRabbitURL          = "amqp://guest:guest@localhost:5672/"
+	defaultTradesExchange     = "trades"
+	defaultCandlesExchange    = "candles"
+	defaultOrderBooksExchange = "orderbooks"
+	defaultRabbitPrefetch     = 500
+	defaultBatchSize          = 2000
+	defaultBatchTimeoutMS     = 200
 )
 
 // Config keeps the runtime configuration for the service.
@@ -25,6 +33,7 @@ type Config struct {
 	Postgres PostgresConfig
 	Redis    RedisConfig
 	Cache    CacheConfig
+	RabbitMQ RabbitMQConfig
 }
 
 // HTTPConfig holds HTTP server related settings.
@@ -55,6 +64,17 @@ type CacheConfig struct {
 	TTLSeconds int
 }
 
+// RabbitMQConfig stores broker connection and batching settings.
+type RabbitMQConfig struct {
+	URL                string
+	TradesExchange     string
+	CandlesExchange    string
+	OrderBooksExchange string
+	Prefetch           int
+	BatchSize          int
+	BatchTimeout       time.Duration
+}
+
 // Load builds Config from environment variables.
 // It first attempts to load a .env file if present (non-fatal if missing).
 func Load() (*Config, error) {
@@ -81,6 +101,19 @@ func Load() (*Config, error) {
 		return nil, fmt.Errorf("parse CACHE_TTL_SECONDS: %w", err)
 	}
 
+	prefetch, err := getInt("RABBITMQ_PREFETCH", defaultRabbitPrefetch)
+	if err != nil {
+		return nil, fmt.Errorf("parse RABBITMQ_PREFETCH: %w", err)
+	}
+	batchSize, err := getInt("RABBITMQ_BATCH_SIZE", defaultBatchSize)
+	if err != nil {
+		return nil, fmt.Errorf("parse RABBITMQ_BATCH_SIZE: %w", err)
+	}
+	timeoutMS, err := getInt("RABBITMQ_BATCH_TIMEOUT_MS", defaultBatchTimeoutMS)
+	if err != nil {
+		return nil, fmt.Errorf("parse RABBITMQ_BATCH_TIMEOUT_MS: %w", err)
+	}
+
 	return &Config{
 		Env:  getString("APP_ENV", defaultEnv),
 		HTTP: HTTPConfig{Host: host, Port: port},
@@ -94,6 +127,15 @@ func Load() (*Config, error) {
 		},
 		Cache: CacheConfig{
 			TTLSeconds: cacheTTL,
+		},
+		RabbitMQ: RabbitMQConfig{
+			URL:                getString("RABBITMQ_URL", defaultRabbitURL),
+			TradesExchange:     getString("RABBITMQ_TRADES_EXCHANGE", defaultTradesExchange),
+			CandlesExchange:    getString("RABBITMQ_CANDLES_EXCHANGE", defaultCandlesExchange),
+			OrderBooksExchange: getString("RABBITMQ_ORDERBOOKS_EXCHANGE", defaultOrderBooksExchange),
+			Prefetch:           prefetch,
+			BatchSize:          batchSize,
+			BatchTimeout:       time.Duration(timeoutMS) * time.Millisecond,
 		},
 	}, nil
 }
