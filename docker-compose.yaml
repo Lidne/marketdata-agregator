@@ -9,9 +9,28 @@ services:
       - POSTGRES_PASSWORD=test
       - POSTGRES_USER=postgres
       - POSTGRES_DB=market_data
-      - TS_TUNE_MEMORY=8GB 
+      - TS_TUNE_MEMORY=4GB 
       - TS_TUNE_NUM_CPUS=4
     ports:
       - "5432:5432"
     volumes:
-      - ./pg_data:/var/lib/postgresql/data
+      - pg_data:/var/lib/postgresql/data
+    networks:
+      - main
+
+  redis:
+    image: redis:alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+    networks:
+      - main
+
+networks:
+  main:
+    driver: bridge
+
+volumes:
+  pg_data:
+  redis-data:
