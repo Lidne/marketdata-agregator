@@ -1,4 +1,76 @@
 definitions:
+  internal_interfaces_http.bondPayload:
+    properties:
+      aci_value:
+        type: number
+      class_code:
+        type: string
+      figi:
+        type: string
+      logo_url:
+        type: string
+      lot:
+        type: integer
+      nominal:
+        type: number
+      ticker:
+        type: string
+      uid:
+        type: string
+    type: object
+  internal_interfaces_http.currencyPayload:
+    properties:
+      class_code:
+        type: string
+      figi:
+        type: string
+      logo_url:
+        type: string
+      lot:
+        type: integer
+      ticker:
+        type: string
+      uid:
+        type: string
+    type: object
+  internal_interfaces_http.etfPayload:
+    properties:
+      class_code:
+        type: string
+      figi:
+        type: string
+      logo_url:
+        type: string
+      lot:
+        type: integer
+      min_price_increment:
+        type: number
+      ticker:
+        type: string
+      uid:
+        type: string
+    type: object
+  internal_interfaces_http.futurePayload:
+    properties:
+      asset_type:
+        type: string
+      class_code:
+        type: string
+      figi:
+        type: string
+      logo_url:
+        type: string
+      lot:
+        type: integer
+      min_price_increment:
+        type: number
+      min_price_increment_amount:
+        type: number
+      ticker:
+        type: string
+      uid:
+        type: string
+    type: object
   internal_interfaces_http.instrumentPayload:
     properties:
       class_code:
@@ -14,7 +86,151 @@ definitions:
       uid:
         type: string
     type: object
+  internal_interfaces_http.sharePayload:
+    properties:
+      class_code:
+        type: string
+      figi:
+        type: string
+      logo_url:
+        type: string
+      lot:
+        type: integer
+      ticker:
+        type: string
+      uid:
+        type: string
+    type: object
+  main_internal_domain_entity_instruments.AssetType:
+    enum:
+    - TYPE_INDEX
+    - TYPE_COMMODITY
+    - TYPE_SECURITY
+    - TYPE_CURRENCY
+    type: string
+    x-enum-varnames:
+    - AssetTypeIndex
+    - AssetTypeCommodity
+    - AssetTypeSecurity
+    - AssetTypeCurrency
+  main_internal_domain_entity_instruments.Bond:
+    properties:
+      aciValue:
+        type: number
+      classCode:
+        type: string
+      createdAt:
+        type: string
+      deletedAt:
+        type: string
+      figi:
+        type: string
+      logoURL:
+        type: string
+      lot:
+        type: integer
+      nominal:
+        type: number
+      ticker:
+        type: string
+      uid:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  main_internal_domain_entity_instruments.Currency:
+    properties:
+      classCode:
+        type: string
+      createdAt:
+        type: string
+      deletedAt:
+        type: string
+      figi:
+        type: string
+      logoURL:
+        type: string
+      lot:
+        type: integer
+      ticker:
+        type: string
+      uid:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  main_internal_domain_entity_instruments.Etf:
+    properties:
+      classCode:
+        type: string
+      createdAt:
+        type: string
+      deletedAt:
+        type: string
+      figi:
+        type: string
+      logoURL:
+        type: string
+      lot:
+        type: integer
+      minPriceIncrement:
+        type: number
+      ticker:
+        type: string
+      uid:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  main_internal_domain_entity_instruments.Future:
+    properties:
+      assetType:
+        $ref: '#/definitions/main_internal_domain_entity_instruments.AssetType'
+      classCode:
+        type: string
+      createdAt:
+        type: string
+      deletedAt:
+        type: string
+      figi:
+        type: string
+      logoURL:
+        type: string
+      lot:
+        type: integer
+      minPriceIncrement:
+        type: number
+      minPriceIncrementAmount:
+        type: number
+      ticker:
+        type: string
+      uid:
+        type: string
+      updatedAt:
+        type: string
+    type: object
   main_internal_domain_entity_instruments.Instrument:
+    properties:
+      classCode:
+        type: string
+      createdAt:
+        type: string
+      deletedAt:
+        type: string
+      figi:
+        type: string
+      logoURL:
+        type: string
+      lot:
+        type: integer
+      ticker:
+        type: string
+      uid:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  main_internal_domain_entity_instruments.Share:
     properties:
       classCode:
         type: string
@@ -252,7 +468,104 @@ paths:
       summary: Update instrument
       tags:
       - instruments
+  /instruments/bonds:
+    post:
+      consumes:
+      - application/json
+      description: Create a bond instrument along with its base instrument record
+      parameters:
+      - description: Bond data
+        in: body
+        name: bond
+        required: true
+        schema:
+          $ref: '#/definitions/internal_interfaces_http.bondPayload'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/main_internal_domain_entity_instruments.Bond'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create bond
+      tags:
+      - bonds
+    put:
+      consumes:
+      - application/json
+      description: Update a bond instrument and its base data
+      parameters:
+      - description: Bond data with UID
+        in: body
+        name: bond
+        required: true
+        schema:
+          $ref: '#/definitions/internal_interfaces_http.bondPayload'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main_internal_domain_entity_instruments.Bond'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update bond
+      tags:
+      - bonds
   /instruments/bonds/{uid}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a bond instrument by UID
+      parameters:
+      - description: Bond UID
+        in: path
+        name: uid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete bond
+      tags:
+      - bonds
     get:
       consumes:
       - application/json
@@ -285,8 +598,105 @@ paths:
             type: object
       summary: Get bond
       tags:
-      - instruments
+      - bonds
+  /instruments/currencies:
+    post:
+      consumes:
+      - application/json
+      description: Create a currency instrument along with its base instrument record
+      parameters:
+      - description: Currency data
+        in: body
+        name: currency
+        required: true
+        schema:
+          $ref: '#/definitions/internal_interfaces_http.currencyPayload'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/main_internal_domain_entity_instruments.Currency'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create currency
+      tags:
+      - currencies
+    put:
+      consumes:
+      - application/json
+      description: Update a currency instrument and its base data
+      parameters:
+      - description: Currency data with UID
+        in: body
+        name: currency
+        required: true
+        schema:
+          $ref: '#/definitions/internal_interfaces_http.currencyPayload'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main_internal_domain_entity_instruments.Currency'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update currency
+      tags:
+      - currencies
   /instruments/currencies/{uid}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a currency instrument by UID
+      parameters:
+      - description: Currency UID
+        in: path
+        name: uid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete currency
+      tags:
+      - currencies
     get:
       consumes:
       - application/json
@@ -319,8 +729,105 @@ paths:
             type: object
       summary: Get currency
       tags:
-      - instruments
+      - currencies
+  /instruments/etfs:
+    post:
+      consumes:
+      - application/json
+      description: Create an ETF instrument along with its base instrument record
+      parameters:
+      - description: ETF data
+        in: body
+        name: etf
+        required: true
+        schema:
+          $ref: '#/definitions/internal_interfaces_http.etfPayload'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/main_internal_domain_entity_instruments.Etf'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create ETF
+      tags:
+      - etfs
+    put:
+      consumes:
+      - application/json
+      description: Update an ETF instrument and its base data
+      parameters:
+      - description: ETF data with UID
+        in: body
+        name: etf
+        required: true
+        schema:
+          $ref: '#/definitions/internal_interfaces_http.etfPayload'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main_internal_domain_entity_instruments.Etf'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update ETF
+      tags:
+      - etfs
   /instruments/etfs/{uid}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete an ETF instrument by UID
+      parameters:
+      - description: ETF UID
+        in: path
+        name: uid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete ETF
+      tags:
+      - etfs
     get:
       consumes:
       - application/json
@@ -353,8 +860,105 @@ paths:
             type: object
       summary: Get ETF
       tags:
-      - instruments
+      - etfs
+  /instruments/futures:
+    post:
+      consumes:
+      - application/json
+      description: Create a future instrument along with its base instrument record
+      parameters:
+      - description: Future data
+        in: body
+        name: future
+        required: true
+        schema:
+          $ref: '#/definitions/internal_interfaces_http.futurePayload'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/main_internal_domain_entity_instruments.Future'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create future
+      tags:
+      - futures
+    put:
+      consumes:
+      - application/json
+      description: Update a future instrument and its base data
+      parameters:
+      - description: Future data with UID
+        in: body
+        name: future
+        required: true
+        schema:
+          $ref: '#/definitions/internal_interfaces_http.futurePayload'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main_internal_domain_entity_instruments.Future'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update future
+      tags:
+      - futures
   /instruments/futures/{uid}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a future instrument by UID
+      parameters:
+      - description: Future UID
+        in: path
+        name: uid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete future
+      tags:
+      - futures
     get:
       consumes:
       - application/json
@@ -387,8 +991,105 @@ paths:
             type: object
       summary: Get future
       tags:
-      - instruments
+      - futures
+  /instruments/shares:
+    post:
+      consumes:
+      - application/json
+      description: Create a share instrument along with its base instrument record
+      parameters:
+      - description: Share data
+        in: body
+        name: share
+        required: true
+        schema:
+          $ref: '#/definitions/internal_interfaces_http.sharePayload'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/main_internal_domain_entity_instruments.Share'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create share
+      tags:
+      - shares
+    put:
+      consumes:
+      - application/json
+      description: Update a share instrument and its base data
+      parameters:
+      - description: Share data with UID
+        in: body
+        name: share
+        required: true
+        schema:
+          $ref: '#/definitions/internal_interfaces_http.sharePayload'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main_internal_domain_entity_instruments.Share'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update share
+      tags:
+      - shares
   /instruments/shares/{uid}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a share instrument by UID
+      parameters:
+      - description: Share UID
+        in: path
+        name: uid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete share
+      tags:
+      - shares
     get:
       consumes:
       - application/json
@@ -421,7 +1122,7 @@ paths:
             type: object
       summary: Get share
       tags:
-      - instruments
+      - shares
   /marketdata/candles:
     get:
       consumes:
@@ -471,7 +1172,7 @@ paths:
             type: object
       summary: Get candles range
       tags:
-      - marketdata
+      - candles
     post:
       consumes:
       - application/json
@@ -502,7 +1203,7 @@ paths:
             type: object
       summary: Add candle
       tags:
-      - marketdata
+      - candles
   /marketdata/candles/batch:
     post:
       consumes:
@@ -536,7 +1237,7 @@ paths:
             type: object
       summary: Add candles batch
       tags:
-      - marketdata
+      - candles
   /marketdata/candles/last:
     get:
       consumes:
@@ -581,7 +1282,7 @@ paths:
             type: object
       summary: Get last candles
       tags:
-      - marketdata
+      - candles
   /marketdata/orderbooks:
     get:
       consumes:
@@ -631,7 +1332,7 @@ paths:
             type: object
       summary: Get order books range
       tags:
-      - marketdata
+      - orderbooks
     post:
       consumes:
       - application/json
@@ -662,7 +1363,7 @@ paths:
             type: object
       summary: Add order book
       tags:
-      - marketdata
+      - orderbooks
   /marketdata/orderbooks/batch:
     post:
       consumes:
@@ -696,7 +1397,7 @@ paths:
             type: object
       summary: Add order books batch
       tags:
-      - marketdata
+      - orderbooks
   /marketdata/orderbooks/last:
     get:
       consumes:
@@ -741,7 +1442,7 @@ paths:
             type: object
       summary: Get last order books
       tags:
-      - marketdata
+      - orderbooks
   /marketdata/trades:
     get:
       consumes:
@@ -786,7 +1487,7 @@ paths:
             type: object
       summary: Get trades range
       tags:
-      - marketdata
+      - trades
     post:
       consumes:
       - application/json
@@ -817,7 +1518,7 @@ paths:
             type: object
       summary: Add trade
       tags:
-      - marketdata
+      - trades
   /marketdata/trades/batch:
     post:
       consumes:
@@ -851,7 +1552,7 @@ paths:
             type: object
       summary: Add trades batch
       tags:
-      - marketdata
+      - trades
   /marketdata/trades/last:
     get:
       consumes:
@@ -891,5 +1592,5 @@ paths:
             type: object
       summary: Get last trades
       tags:
-      - marketdata
+      - trades
 swagger: "2.0"

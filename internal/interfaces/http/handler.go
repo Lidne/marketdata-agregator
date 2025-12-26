@@ -89,10 +89,29 @@ func (h *Handler) registerRoutes() {
 		inst.GET("/", h.getInstrument)
 		inst.DELETE("/", h.deleteInstrument)
 
+		inst.POST("/shares", h.createShare)
+		inst.PUT("/shares", h.updateShare)
+		inst.DELETE("/shares/:uid", h.deleteShare)
 		inst.GET("/shares/:uid", h.getShare)
+
+		inst.POST("/bonds", h.createBond)
+		inst.PUT("/bonds", h.updateBond)
+		inst.DELETE("/bonds/:uid", h.deleteBond)
 		inst.GET("/bonds/:uid", h.getBond)
+
+		inst.POST("/futures", h.createFuture)
+		inst.PUT("/futures", h.updateFuture)
+		inst.DELETE("/futures/:uid", h.deleteFuture)
 		inst.GET("/futures/:uid", h.getFuture)
+
+		inst.POST("/currencies", h.createCurrency)
+		inst.PUT("/currencies", h.updateCurrency)
+		inst.DELETE("/currencies/:uid", h.deleteCurrency)
 		inst.GET("/currencies/:uid", h.getCurrency)
+
+		inst.POST("/etfs", h.createEtf)
+		inst.PUT("/etfs", h.updateEtf)
+		inst.DELETE("/etfs/:uid", h.deleteEtf)
 		inst.GET("/etfs/:uid", h.getEtf)
 	}
 
@@ -242,10 +261,440 @@ func (h *Handler) deleteInstrument(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
+// createShare creates a new share instrument
+// @Summary      Create share
+// @Description  Create a share instrument along with its base instrument record
+// @Tags         shares
+// @Accept       json
+// @Produce      json
+// @Param        share  body      sharePayload  true  "Share data"
+// @Success      201    {object}  domaininstruments.Share
+// @Failure      400    {object}  map[string]string
+// @Failure      500    {object}  map[string]string
+// @Router       /instruments/shares [post]
+func (h *Handler) createShare(c *gin.Context) {
+	var payload sharePayload
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		writeError(c, http.StatusBadRequest, err)
+		return
+	}
+	share, err := payload.toDomainShare()
+	if err != nil {
+		writeError(c, http.StatusBadRequest, err)
+		return
+	}
+	if err := h.instruments.CreateShare(c.Request.Context(), share); err != nil {
+		writeError(c, http.StatusInternalServerError, err)
+		return
+	}
+	c.JSON(http.StatusCreated, share)
+}
+
+// updateShare updates an existing share instrument
+// @Summary      Update share
+// @Description  Update a share instrument and its base data
+// @Tags         shares
+// @Accept       json
+// @Produce      json
+// @Param        share  body      sharePayload  true  "Share data with UID"
+// @Success      200    {object}  domaininstruments.Share
+// @Failure      400    {object}  map[string]string
+// @Failure      500    {object}  map[string]string
+// @Router       /instruments/shares [put]
+func (h *Handler) updateShare(c *gin.Context) {
+	var payload sharePayload
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		writeError(c, http.StatusBadRequest, err)
+		return
+	}
+	if payload.UID == "" {
+		writeError(c, http.StatusBadRequest, errMissingUID)
+		return
+	}
+	share, err := payload.toDomainShare()
+	if err != nil {
+		writeError(c, http.StatusBadRequest, err)
+		return
+	}
+	if err := h.instruments.UpdateShare(c.Request.Context(), share); err != nil {
+		writeError(c, http.StatusInternalServerError, err)
+		return
+	}
+	c.JSON(http.StatusOK, share)
+}
+
+// deleteShare deletes a share instrument
+// @Summary      Delete share
+// @Description  Delete a share instrument by UID
+// @Tags         shares
+// @Accept       json
+// @Produce      json
+// @Param        uid   path      string  true  "Share UID"
+// @Success      204   "No Content"
+// @Failure      400   {object}  map[string]string
+// @Failure      500   {object}  map[string]string
+// @Router       /instruments/shares/{uid} [delete]
+func (h *Handler) deleteShare(c *gin.Context) {
+	uid, err := parseUIDParam(c)
+	if err != nil {
+		writeError(c, http.StatusBadRequest, err)
+		return
+	}
+	if err := h.instruments.DeleteShare(c.Request.Context(), uid); err != nil {
+		writeError(c, http.StatusInternalServerError, err)
+		return
+	}
+	c.Status(http.StatusNoContent)
+}
+
+// createBond creates a bond instrument
+// @Summary      Create bond
+// @Description  Create a bond instrument along with its base instrument record
+// @Tags         bonds
+// @Accept       json
+// @Produce      json
+// @Param        bond  body      bondPayload  true  "Bond data"
+// @Success      201   {object}  domaininstruments.Bond
+// @Failure      400   {object}  map[string]string
+// @Failure      500   {object}  map[string]string
+// @Router       /instruments/bonds [post]
+func (h *Handler) createBond(c *gin.Context) {
+	var payload bondPayload
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		writeError(c, http.StatusBadRequest, err)
+		return
+	}
+	bond, err := payload.toDomainBond()
+	if err != nil {
+		writeError(c, http.StatusBadRequest, err)
+		return
+	}
+	if err := h.instruments.CreateBond(c.Request.Context(), bond); err != nil {
+		writeError(c, http.StatusInternalServerError, err)
+		return
+	}
+	c.JSON(http.StatusCreated, bond)
+}
+
+// updateBond updates a bond instrument
+// @Summary      Update bond
+// @Description  Update a bond instrument and its base data
+// @Tags         bonds
+// @Accept       json
+// @Produce      json
+// @Param        bond  body      bondPayload  true  "Bond data with UID"
+// @Success      200   {object}  domaininstruments.Bond
+// @Failure      400   {object}  map[string]string
+// @Failure      500   {object}  map[string]string
+// @Router       /instruments/bonds [put]
+func (h *Handler) updateBond(c *gin.Context) {
+	var payload bondPayload
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		writeError(c, http.StatusBadRequest, err)
+		return
+	}
+	if payload.UID == "" {
+		writeError(c, http.StatusBadRequest, errMissingUID)
+		return
+	}
+	bond, err := payload.toDomainBond()
+	if err != nil {
+		writeError(c, http.StatusBadRequest, err)
+		return
+	}
+	if err := h.instruments.UpdateBond(c.Request.Context(), bond); err != nil {
+		writeError(c, http.StatusInternalServerError, err)
+		return
+	}
+	c.JSON(http.StatusOK, bond)
+}
+
+// deleteBond deletes a bond instrument
+// @Summary      Delete bond
+// @Description  Delete a bond instrument by UID
+// @Tags         bonds
+// @Accept       json
+// @Produce      json
+// @Param        uid   path      string  true  "Bond UID"
+// @Success      204   "No Content"
+// @Failure      400   {object}  map[string]string
+// @Failure      500   {object}  map[string]string
+// @Router       /instruments/bonds/{uid} [delete]
+func (h *Handler) deleteBond(c *gin.Context) {
+	uid, err := parseUIDParam(c)
+	if err != nil {
+		writeError(c, http.StatusBadRequest, err)
+		return
+	}
+	if err := h.instruments.DeleteBond(c.Request.Context(), uid); err != nil {
+		writeError(c, http.StatusInternalServerError, err)
+		return
+	}
+	c.Status(http.StatusNoContent)
+}
+
+// createFuture creates a future instrument
+// @Summary      Create future
+// @Description  Create a future instrument along with its base instrument record
+// @Tags         futures
+// @Accept       json
+// @Produce      json
+// @Param        future  body      futurePayload  true  "Future data"
+// @Success      201     {object}  domaininstruments.Future
+// @Failure      400     {object}  map[string]string
+// @Failure      500     {object}  map[string]string
+// @Router       /instruments/futures [post]
+func (h *Handler) createFuture(c *gin.Context) {
+	var payload futurePayload
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		writeError(c, http.StatusBadRequest, err)
+		return
+	}
+	future, err := payload.toDomainFuture()
+	if err != nil {
+		writeError(c, http.StatusBadRequest, err)
+		return
+	}
+	if err := h.instruments.CreateFuture(c.Request.Context(), future); err != nil {
+		writeError(c, http.StatusInternalServerError, err)
+		return
+	}
+	c.JSON(http.StatusCreated, future)
+}
+
+// updateFuture updates a future instrument
+// @Summary      Update future
+// @Description  Update a future instrument and its base data
+// @Tags         futures
+// @Accept       json
+// @Produce      json
+// @Param        future  body      futurePayload  true  "Future data with UID"
+// @Success      200     {object}  domaininstruments.Future
+// @Failure      400     {object}  map[string]string
+// @Failure      500     {object}  map[string]string
+// @Router       /instruments/futures [put]
+func (h *Handler) updateFuture(c *gin.Context) {
+	var payload futurePayload
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		writeError(c, http.StatusBadRequest, err)
+		return
+	}
+	if payload.UID == "" {
+		writeError(c, http.StatusBadRequest, errMissingUID)
+		return
+	}
+	future, err := payload.toDomainFuture()
+	if err != nil {
+		writeError(c, http.StatusBadRequest, err)
+		return
+	}
+	if err := h.instruments.UpdateFuture(c.Request.Context(), future); err != nil {
+		writeError(c, http.StatusInternalServerError, err)
+		return
+	}
+	c.JSON(http.StatusOK, future)
+}
+
+// deleteFuture deletes a future instrument
+// @Summary      Delete future
+// @Description  Delete a future instrument by UID
+// @Tags         futures
+// @Accept       json
+// @Produce      json
+// @Param        uid   path      string  true  "Future UID"
+// @Success      204   "No Content"
+// @Failure      400   {object}  map[string]string
+// @Failure      500   {object}  map[string]string
+// @Router       /instruments/futures/{uid} [delete]
+func (h *Handler) deleteFuture(c *gin.Context) {
+	uid, err := parseUIDParam(c)
+	if err != nil {
+		writeError(c, http.StatusBadRequest, err)
+		return
+	}
+	if err := h.instruments.DeleteFuture(c.Request.Context(), uid); err != nil {
+		writeError(c, http.StatusInternalServerError, err)
+		return
+	}
+	c.Status(http.StatusNoContent)
+}
+
+// createCurrency creates a currency instrument
+// @Summary      Create currency
+// @Description  Create a currency instrument along with its base instrument record
+// @Tags         currencies
+// @Accept       json
+// @Produce      json
+// @Param        currency  body      currencyPayload  true  "Currency data"
+// @Success      201       {object}  domaininstruments.Currency
+// @Failure      400       {object}  map[string]string
+// @Failure      500       {object}  map[string]string
+// @Router       /instruments/currencies [post]
+func (h *Handler) createCurrency(c *gin.Context) {
+	var payload currencyPayload
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		writeError(c, http.StatusBadRequest, err)
+		return
+	}
+	currency, err := payload.toDomainCurrency()
+	if err != nil {
+		writeError(c, http.StatusBadRequest, err)
+		return
+	}
+	if err := h.instruments.CreateCurrency(c.Request.Context(), currency); err != nil {
+		writeError(c, http.StatusInternalServerError, err)
+		return
+	}
+	c.JSON(http.StatusCreated, currency)
+}
+
+// updateCurrency updates a currency instrument
+// @Summary      Update currency
+// @Description  Update a currency instrument and its base data
+// @Tags         currencies
+// @Accept       json
+// @Produce      json
+// @Param        currency  body      currencyPayload  true  "Currency data with UID"
+// @Success      200       {object}  domaininstruments.Currency
+// @Failure      400       {object}  map[string]string
+// @Failure      500       {object}  map[string]string
+// @Router       /instruments/currencies [put]
+func (h *Handler) updateCurrency(c *gin.Context) {
+	var payload currencyPayload
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		writeError(c, http.StatusBadRequest, err)
+		return
+	}
+	if payload.UID == "" {
+		writeError(c, http.StatusBadRequest, errMissingUID)
+		return
+	}
+	currency, err := payload.toDomainCurrency()
+	if err != nil {
+		writeError(c, http.StatusBadRequest, err)
+		return
+	}
+	if err := h.instruments.UpdateCurrency(c.Request.Context(), currency); err != nil {
+		writeError(c, http.StatusInternalServerError, err)
+		return
+	}
+	c.JSON(http.StatusOK, currency)
+}
+
+// deleteCurrency deletes a currency instrument
+// @Summary      Delete currency
+// @Description  Delete a currency instrument by UID
+// @Tags         currencies
+// @Accept       json
+// @Produce      json
+// @Param        uid   path      string  true  "Currency UID"
+// @Success      204   "No Content"
+// @Failure      400   {object}  map[string]string
+// @Failure      500   {object}  map[string]string
+// @Router       /instruments/currencies/{uid} [delete]
+func (h *Handler) deleteCurrency(c *gin.Context) {
+	uid, err := parseUIDParam(c)
+	if err != nil {
+		writeError(c, http.StatusBadRequest, err)
+		return
+	}
+	if err := h.instruments.DeleteCurrency(c.Request.Context(), uid); err != nil {
+		writeError(c, http.StatusInternalServerError, err)
+		return
+	}
+	c.Status(http.StatusNoContent)
+}
+
+// createEtf creates an ETF instrument
+// @Summary      Create ETF
+// @Description  Create an ETF instrument along with its base instrument record
+// @Tags         etfs
+// @Accept       json
+// @Produce      json
+// @Param        etf  body      etfPayload  true  "ETF data"
+// @Success      201  {object}  domaininstruments.Etf
+// @Failure      400  {object}  map[string]string
+// @Failure      500  {object}  map[string]string
+// @Router       /instruments/etfs [post]
+func (h *Handler) createEtf(c *gin.Context) {
+	var payload etfPayload
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		writeError(c, http.StatusBadRequest, err)
+		return
+	}
+	etf, err := payload.toDomainEtf()
+	if err != nil {
+		writeError(c, http.StatusBadRequest, err)
+		return
+	}
+	if err := h.instruments.CreateEtf(c.Request.Context(), etf); err != nil {
+		writeError(c, http.StatusInternalServerError, err)
+		return
+	}
+	c.JSON(http.StatusCreated, etf)
+}
+
+// updateEtf updates an ETF instrument
+// @Summary      Update ETF
+// @Description  Update an ETF instrument and its base data
+// @Tags         etfs
+// @Accept       json
+// @Produce      json
+// @Param        etf  body      etfPayload  true  "ETF data with UID"
+// @Success      200  {object}  domaininstruments.Etf
+// @Failure      400  {object}  map[string]string
+// @Failure      500  {object}  map[string]string
+// @Router       /instruments/etfs [put]
+func (h *Handler) updateEtf(c *gin.Context) {
+	var payload etfPayload
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		writeError(c, http.StatusBadRequest, err)
+		return
+	}
+	if payload.UID == "" {
+		writeError(c, http.StatusBadRequest, errMissingUID)
+		return
+	}
+	etf, err := payload.toDomainEtf()
+	if err != nil {
+		writeError(c, http.StatusBadRequest, err)
+		return
+	}
+	if err := h.instruments.UpdateEtf(c.Request.Context(), etf); err != nil {
+		writeError(c, http.StatusInternalServerError, err)
+		return
+	}
+	c.JSON(http.StatusOK, etf)
+}
+
+// deleteEtf deletes an ETF instrument
+// @Summary      Delete ETF
+// @Description  Delete an ETF instrument by UID
+// @Tags         etfs
+// @Accept       json
+// @Produce      json
+// @Param        uid   path      string  true  "ETF UID"
+// @Success      204   "No Content"
+// @Failure      400   {object}  map[string]string
+// @Failure      500   {object}  map[string]string
+// @Router       /instruments/etfs/{uid} [delete]
+func (h *Handler) deleteEtf(c *gin.Context) {
+	uid, err := parseUIDParam(c)
+	if err != nil {
+		writeError(c, http.StatusBadRequest, err)
+		return
+	}
+	if err := h.instruments.DeleteEtf(c.Request.Context(), uid); err != nil {
+		writeError(c, http.StatusInternalServerError, err)
+		return
+	}
+	c.Status(http.StatusNoContent)
+}
+
 // getShare retrieves a share instrument by UID
 // @Summary      Get share
 // @Description  Get a share instrument by UID
-// @Tags         instruments
+// @Tags         shares
 // @Accept       json
 // @Produce      json
 // @Param        uid   path      string  true  "Share UID"
@@ -262,7 +711,7 @@ func (h *Handler) getShare(c *gin.Context) {
 // getBond retrieves a bond instrument by UID
 // @Summary      Get bond
 // @Description  Get a bond instrument by UID
-// @Tags         instruments
+// @Tags         bonds
 // @Accept       json
 // @Produce      json
 // @Param        uid   path      string  true  "Bond UID"
@@ -279,7 +728,7 @@ func (h *Handler) getBond(c *gin.Context) {
 // getFuture retrieves a future instrument by UID
 // @Summary      Get future
 // @Description  Get a future instrument by UID
-// @Tags         instruments
+// @Tags         futures
 // @Accept       json
 // @Produce      json
 // @Param        uid   path      string  true  "Future UID"
@@ -296,7 +745,7 @@ func (h *Handler) getFuture(c *gin.Context) {
 // getCurrency retrieves a currency instrument by UID
 // @Summary      Get currency
 // @Description  Get a currency instrument by UID
-// @Tags         instruments
+// @Tags         currencies
 // @Accept       json
 // @Produce      json
 // @Param        uid   path      string  true  "Currency UID"
@@ -313,7 +762,7 @@ func (h *Handler) getCurrency(c *gin.Context) {
 // getEtf retrieves an ETF instrument by UID
 // @Summary      Get ETF
 // @Description  Get an ETF instrument by UID
-// @Tags         instruments
+// @Tags         etfs
 // @Accept       json
 // @Produce      json
 // @Param        uid   path      string  true  "ETF UID"
@@ -328,9 +777,9 @@ func (h *Handler) getEtf(c *gin.Context) {
 }
 
 func (h *Handler) handleTypedInstrument(c *gin.Context, fn func(ctx context.Context, uid uuid.UUID) (interface{}, error)) {
-	uid, err := uuid.Parse(c.Param("uid"))
+	uid, err := parseUIDParam(c)
 	if err != nil {
-		writeError(c, http.StatusBadRequest, errMissingUID)
+		writeError(c, http.StatusBadRequest, err)
 		return
 	}
 	result, err := fn(c.Request.Context(), uid)
@@ -346,7 +795,7 @@ func (h *Handler) handleTypedInstrument(c *gin.Context, fn func(ctx context.Cont
 // addTrade adds a single trade
 // @Summary      Add trade
 // @Description  Add a single trade record
-// @Tags         marketdata
+// @Tags         trades
 // @Accept       json
 // @Produce      json
 // @Param        trade  body      domainmarketdata.Trade  true  "Trade data"
@@ -370,7 +819,7 @@ func (h *Handler) addTrade(c *gin.Context) {
 // addTradesBatch adds multiple trades in a batch
 // @Summary      Add trades batch
 // @Description  Add multiple trade records in a single request
-// @Tags         marketdata
+// @Tags         trades
 // @Accept       json
 // @Produce      json
 // @Param        trades  body      []domainmarketdata.Trade  true  "Array of trade data"
@@ -394,7 +843,7 @@ func (h *Handler) addTradesBatch(c *gin.Context) {
 // getTradesRange retrieves trades within a time range
 // @Summary      Get trades range
 // @Description  Get trades for an instrument within a time range
-// @Tags         marketdata
+// @Tags         trades
 // @Accept       json
 // @Produce      json
 // @Param        instrument_uid  query     string  true  "Instrument UID"
@@ -426,7 +875,7 @@ func (h *Handler) getTradesRange(c *gin.Context) {
 // getTradesLast retrieves the last N trades
 // @Summary      Get last trades
 // @Description  Get the last N trades for an instrument
-// @Tags         marketdata
+// @Tags         trades
 // @Accept       json
 // @Produce      json
 // @Param        instrument_uid  query     string  true  "Instrument UID"
@@ -452,7 +901,7 @@ func (h *Handler) getTradesLast(c *gin.Context) {
 // addCandle adds a single candle
 // @Summary      Add candle
 // @Description  Add a single candle record
-// @Tags         marketdata
+// @Tags         candles
 // @Accept       json
 // @Produce      json
 // @Param        candle  body      domainmarketdata.Candle  true  "Candle data"
@@ -476,7 +925,7 @@ func (h *Handler) addCandle(c *gin.Context) {
 // addCandlesBatch adds multiple candles in a batch
 // @Summary      Add candles batch
 // @Description  Add multiple candle records in a single request
-// @Tags         marketdata
+// @Tags         candles
 // @Accept       json
 // @Produce      json
 // @Param        candles  body      []domainmarketdata.Candle  true  "Array of candle data"
@@ -500,7 +949,7 @@ func (h *Handler) addCandlesBatch(c *gin.Context) {
 // getCandlesRange retrieves candles within a time range
 // @Summary      Get candles range
 // @Description  Get candles for an instrument within a time range
-// @Tags         marketdata
+// @Tags         candles
 // @Accept       json
 // @Produce      json
 // @Param        instrument_uid   query     string  true  "Instrument UID"
@@ -538,7 +987,7 @@ func (h *Handler) getCandlesRange(c *gin.Context) {
 // getCandlesLast retrieves the last N candles
 // @Summary      Get last candles
 // @Description  Get the last N candles for an instrument
-// @Tags         marketdata
+// @Tags         candles
 // @Accept       json
 // @Produce      json
 // @Param        instrument_uid   query     string  true  "Instrument UID"
@@ -565,7 +1014,7 @@ func (h *Handler) getCandlesLast(c *gin.Context) {
 // addOrderBook adds a single order book snapshot
 // @Summary      Add order book
 // @Description  Add a single order book snapshot
-// @Tags         marketdata
+// @Tags         orderbooks
 // @Accept       json
 // @Produce      json
 // @Param        orderbook  body      domainmarketdata.OrderBookSnapshot  true  "Order book snapshot data"
@@ -589,7 +1038,7 @@ func (h *Handler) addOrderBook(c *gin.Context) {
 // addOrderBooksBatch adds multiple order book snapshots in a batch
 // @Summary      Add order books batch
 // @Description  Add multiple order book snapshots in a single request
-// @Tags         marketdata
+// @Tags         orderbooks
 // @Accept       json
 // @Produce      json
 // @Param        orderbooks  body      []domainmarketdata.OrderBookSnapshot  true  "Array of order book snapshot data"
@@ -613,7 +1062,7 @@ func (h *Handler) addOrderBooksBatch(c *gin.Context) {
 // getOrderBooksRange retrieves order book snapshots within a time range
 // @Summary      Get order books range
 // @Description  Get order book snapshots for an instrument within a time range
-// @Tags         marketdata
+// @Tags         orderbooks
 // @Accept       json
 // @Produce      json
 // @Param        instrument_uid  query     string  true  "Instrument UID"
@@ -651,7 +1100,7 @@ func (h *Handler) getOrderBooksRange(c *gin.Context) {
 // getOrderBooksLast retrieves the last N order book snapshots
 // @Summary      Get last order books
 // @Description  Get the last N order book snapshots for an instrument
-// @Tags         marketdata
+// @Tags         orderbooks
 // @Accept       json
 // @Produce      json
 // @Param        instrument_uid  query     string  true  "Instrument UID"
@@ -709,6 +1158,88 @@ func (p instrumentPayload) toDomain() (*domaininstruments.Instrument, error) {
 	return inst, nil
 }
 
+type sharePayload struct {
+	instrumentPayload
+}
+
+func (p sharePayload) toDomainShare() (*domaininstruments.Share, error) {
+	inst, err := p.instrumentPayload.toDomain()
+	if err != nil {
+		return nil, err
+	}
+	return &domaininstruments.Share{Instrument: *inst}, nil
+}
+
+type bondPayload struct {
+	instrumentPayload
+	Nominal  float64 `json:"nominal"`
+	AciValue float64 `json:"aci_value"`
+}
+
+func (p bondPayload) toDomainBond() (*domaininstruments.Bond, error) {
+	inst, err := p.instrumentPayload.toDomain()
+	if err != nil {
+		return nil, err
+	}
+	return &domaininstruments.Bond{
+		Instrument: *inst,
+		Nominal:    p.Nominal,
+		AciValue:   p.AciValue,
+	}, nil
+}
+
+type futurePayload struct {
+	instrumentPayload
+	MinPriceIncrement       float64 `json:"min_price_increment"`
+	MinPriceIncrementAmount float64 `json:"min_price_increment_amount"`
+	AssetType               string  `json:"asset_type"`
+}
+
+func (p futurePayload) toDomainFuture() (*domaininstruments.Future, error) {
+	inst, err := p.instrumentPayload.toDomain()
+	if err != nil {
+		return nil, err
+	}
+	assetType, err := domaininstruments.NewAssetType(p.AssetType)
+	if err != nil {
+		return nil, err
+	}
+	return &domaininstruments.Future{
+		Instrument:              *inst,
+		MinPriceIncrement:       p.MinPriceIncrement,
+		MinPriceIncrementAmount: p.MinPriceIncrementAmount,
+		AssetType:               assetType,
+	}, nil
+}
+
+type currencyPayload struct {
+	instrumentPayload
+}
+
+func (p currencyPayload) toDomainCurrency() (*domaininstruments.Currency, error) {
+	inst, err := p.instrumentPayload.toDomain()
+	if err != nil {
+		return nil, err
+	}
+	return &domaininstruments.Currency{Instrument: *inst}, nil
+}
+
+type etfPayload struct {
+	instrumentPayload
+	MinPriceIncrement float64 `json:"min_price_increment"`
+}
+
+func (p etfPayload) toDomainEtf() (*domaininstruments.Etf, error) {
+	inst, err := p.instrumentPayload.toDomain()
+	if err != nil {
+		return nil, err
+	}
+	return &domaininstruments.Etf{
+		Instrument:        *inst,
+		MinPriceIncrement: p.MinPriceIncrement,
+	}, nil
+}
+
 func (h *Handler) parseInstrumentAndLimit(c *gin.Context) (uuid.UUID, int, error) {
 	instrumentUID, err := parseUUIDQuery(c, "instrument_uid")
 	if err != nil {
@@ -734,6 +1265,14 @@ func (h *Handler) parseInstrumentLimitInterval(c *gin.Context) (uuid.UUID, int, 
 		return uuid.UUID{}, 0, 0, fmt.Errorf("interval_seconds query param required")
 	}
 	return instrumentUID, limit, intervalSeconds, nil
+}
+
+func parseUIDParam(c *gin.Context) (uuid.UUID, error) {
+	uid, err := uuid.Parse(c.Param("uid"))
+	if err != nil {
+		return uuid.Nil, errMissingUID
+	}
+	return uid, nil
 }
 
 func writeError(c *gin.Context, status int, err error) {

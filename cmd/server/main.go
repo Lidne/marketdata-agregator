@@ -8,7 +8,7 @@ import (
 	"syscall"
 	"time"
 
-	_ "main/docs"
+	docs "main/docs"
 	appinstruments "main/internal/application/service/instruments"
 	appmarketdata "main/internal/application/service/marketdata"
 	"main/internal/config"
@@ -31,6 +31,9 @@ func main() {
 	if err != nil {
 		logger.Fatalf("failed to load config: %v", err)
 	}
+
+	docs.SwaggerInfo.BasePath = "/api/v1"
+	docs.SwaggerInfo.Host = cfg.HTTP.Addr()
 
 	instrumentRepo, err := infrainstruments.NewRepository(ctx, cfg.Postgres.DSN)
 	if err != nil {

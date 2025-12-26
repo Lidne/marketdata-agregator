@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+
+	"github.com/joho/godotenv"
 )
 
 const (
@@ -54,7 +56,10 @@ type CacheConfig struct {
 }
 
 // Load builds Config from environment variables.
+// It first attempts to load a .env file if present (non-fatal if missing).
 func Load() (*Config, error) {
+	_ = godotenv.Load()
+
 	host := getString("HTTP_HOST", defaultHTTPHost)
 	port, err := getInt("HTTP_PORT", defaultHTTPPort)
 	if err != nil {

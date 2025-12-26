@@ -27,6 +27,24 @@ services:
     networks:
       - main
 
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "george.ermekov@gmail.com"
+      PGADMIN_DEFAULT_PASSWORD: "1111"
+      SCRIPT_NAME: /pgadmin
+    ports:
+      - "5433:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - main
+    logging:
+      options:
+        max-size: 10m
+
 networks:
   main:
     driver: bridge
@@ -34,3 +52,4 @@ networks:
 volumes:
   pg_data:
   redis-data:
+  pgadmin_data:

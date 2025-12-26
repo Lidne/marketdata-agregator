@@ -210,6 +210,108 @@ const docTemplate = `{
                 }
             }
         },
+        "/instruments/bonds": {
+            "put": {
+                "description": "Update a bond instrument and its base data",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "bonds"
+                ],
+                "summary": "Update bond",
+                "parameters": [
+                    {
+                        "description": "Bond data with UID",
+                        "name": "bond",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_interfaces_http.bondPayload"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/main_internal_domain_entity_instruments.Bond"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a bond instrument along with its base instrument record",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "bonds"
+                ],
+                "summary": "Create bond",
+                "parameters": [
+                    {
+                        "description": "Bond data",
+                        "name": "bond",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_interfaces_http.bondPayload"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/main_internal_domain_entity_instruments.Bond"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/instruments/bonds/{uid}": {
             "get": {
                 "description": "Get a bond instrument by UID",
@@ -220,7 +322,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "instruments"
+                    "bonds"
                 ],
                 "summary": "Get bond",
                 "parameters": [
@@ -259,6 +361,153 @@ const docTemplate = `{
                         }
                     }
                 }
+            },
+            "delete": {
+                "description": "Delete a bond instrument by UID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "bonds"
+                ],
+                "summary": "Delete bond",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bond UID",
+                        "name": "uid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/instruments/currencies": {
+            "put": {
+                "description": "Update a currency instrument and its base data",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "currencies"
+                ],
+                "summary": "Update currency",
+                "parameters": [
+                    {
+                        "description": "Currency data with UID",
+                        "name": "currency",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_interfaces_http.currencyPayload"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/main_internal_domain_entity_instruments.Currency"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a currency instrument along with its base instrument record",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "currencies"
+                ],
+                "summary": "Create currency",
+                "parameters": [
+                    {
+                        "description": "Currency data",
+                        "name": "currency",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_interfaces_http.currencyPayload"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/main_internal_domain_entity_instruments.Currency"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
             }
         },
         "/instruments/currencies/{uid}": {
@@ -271,7 +520,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "instruments"
+                    "currencies"
                 ],
                 "summary": "Get currency",
                 "parameters": [
@@ -310,6 +559,153 @@ const docTemplate = `{
                         }
                     }
                 }
+            },
+            "delete": {
+                "description": "Delete a currency instrument by UID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "currencies"
+                ],
+                "summary": "Delete currency",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Currency UID",
+                        "name": "uid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/instruments/etfs": {
+            "put": {
+                "description": "Update an ETF instrument and its base data",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "etfs"
+                ],
+                "summary": "Update ETF",
+                "parameters": [
+                    {
+                        "description": "ETF data with UID",
+                        "name": "etf",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_interfaces_http.etfPayload"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/main_internal_domain_entity_instruments.Etf"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create an ETF instrument along with its base instrument record",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "etfs"
+                ],
+                "summary": "Create ETF",
+                "parameters": [
+                    {
+                        "description": "ETF data",
+                        "name": "etf",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_interfaces_http.etfPayload"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/main_internal_domain_entity_instruments.Etf"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
             }
         },
         "/instruments/etfs/{uid}": {
@@ -322,7 +718,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "instruments"
+                    "etfs"
                 ],
                 "summary": "Get ETF",
                 "parameters": [
@@ -361,6 +757,153 @@ const docTemplate = `{
                         }
                     }
                 }
+            },
+            "delete": {
+                "description": "Delete an ETF instrument by UID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "etfs"
+                ],
+                "summary": "Delete ETF",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ETF UID",
+                        "name": "uid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/instruments/futures": {
+            "put": {
+                "description": "Update a future instrument and its base data",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "futures"
+                ],
+                "summary": "Update future",
+                "parameters": [
+                    {
+                        "description": "Future data with UID",
+                        "name": "future",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_interfaces_http.futurePayload"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/main_internal_domain_entity_instruments.Future"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a future instrument along with its base instrument record",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "futures"
+                ],
+                "summary": "Create future",
+                "parameters": [
+                    {
+                        "description": "Future data",
+                        "name": "future",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_interfaces_http.futurePayload"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/main_internal_domain_entity_instruments.Future"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
             }
         },
         "/instruments/futures/{uid}": {
@@ -373,7 +916,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "instruments"
+                    "futures"
                 ],
                 "summary": "Get future",
                 "parameters": [
@@ -412,6 +955,153 @@ const docTemplate = `{
                         }
                     }
                 }
+            },
+            "delete": {
+                "description": "Delete a future instrument by UID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "futures"
+                ],
+                "summary": "Delete future",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Future UID",
+                        "name": "uid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/instruments/shares": {
+            "put": {
+                "description": "Update a share instrument and its base data",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "shares"
+                ],
+                "summary": "Update share",
+                "parameters": [
+                    {
+                        "description": "Share data with UID",
+                        "name": "share",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_interfaces_http.sharePayload"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/main_internal_domain_entity_instruments.Share"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a share instrument along with its base instrument record",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "shares"
+                ],
+                "summary": "Create share",
+                "parameters": [
+                    {
+                        "description": "Share data",
+                        "name": "share",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_interfaces_http.sharePayload"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/main_internal_domain_entity_instruments.Share"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
             }
         },
         "/instruments/shares/{uid}": {
@@ -424,7 +1114,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "instruments"
+                    "shares"
                 ],
                 "summary": "Get share",
                 "parameters": [
@@ -463,6 +1153,51 @@ const docTemplate = `{
                         }
                     }
                 }
+            },
+            "delete": {
+                "description": "Delete a share instrument by UID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "shares"
+                ],
+                "summary": "Delete share",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Share UID",
+                        "name": "uid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
             }
         },
         "/marketdata/candles": {
@@ -475,7 +1210,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "marketdata"
+                    "candles"
                 ],
                 "summary": "Get candles range",
                 "parameters": [
@@ -547,7 +1282,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "marketdata"
+                    "candles"
                 ],
                 "summary": "Add candle",
                 "parameters": [
@@ -596,7 +1331,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "marketdata"
+                    "candles"
                 ],
                 "summary": "Add candles batch",
                 "parameters": [
@@ -648,7 +1383,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "marketdata"
+                    "candles"
                 ],
                 "summary": "Get last candles",
                 "parameters": [
@@ -715,7 +1450,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "marketdata"
+                    "orderbooks"
                 ],
                 "summary": "Get order books range",
                 "parameters": [
@@ -787,7 +1522,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "marketdata"
+                    "orderbooks"
                 ],
                 "summary": "Add order book",
                 "parameters": [
@@ -836,7 +1571,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "marketdata"
+                    "orderbooks"
                 ],
                 "summary": "Add order books batch",
                 "parameters": [
@@ -888,7 +1623,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "marketdata"
+                    "orderbooks"
                 ],
                 "summary": "Get last order books",
                 "parameters": [
@@ -955,7 +1690,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "marketdata"
+                    "trades"
                 ],
                 "summary": "Get trades range",
                 "parameters": [
@@ -1020,7 +1755,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "marketdata"
+                    "trades"
                 ],
                 "summary": "Add trade",
                 "parameters": [
@@ -1069,7 +1804,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "marketdata"
+                    "trades"
                 ],
                 "summary": "Add trades batch",
                 "parameters": [
@@ -1121,7 +1856,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "marketdata"
+                    "trades"
                 ],
                 "summary": "Get last trades",
                 "parameters": [
@@ -1173,6 +1908,116 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "internal_interfaces_http.bondPayload": {
+            "type": "object",
+            "properties": {
+                "aci_value": {
+                    "type": "number"
+                },
+                "class_code": {
+                    "type": "string"
+                },
+                "figi": {
+                    "type": "string"
+                },
+                "logo_url": {
+                    "type": "string"
+                },
+                "lot": {
+                    "type": "integer"
+                },
+                "nominal": {
+                    "type": "number"
+                },
+                "ticker": {
+                    "type": "string"
+                },
+                "uid": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_interfaces_http.currencyPayload": {
+            "type": "object",
+            "properties": {
+                "class_code": {
+                    "type": "string"
+                },
+                "figi": {
+                    "type": "string"
+                },
+                "logo_url": {
+                    "type": "string"
+                },
+                "lot": {
+                    "type": "integer"
+                },
+                "ticker": {
+                    "type": "string"
+                },
+                "uid": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_interfaces_http.etfPayload": {
+            "type": "object",
+            "properties": {
+                "class_code": {
+                    "type": "string"
+                },
+                "figi": {
+                    "type": "string"
+                },
+                "logo_url": {
+                    "type": "string"
+                },
+                "lot": {
+                    "type": "integer"
+                },
+                "min_price_increment": {
+                    "type": "number"
+                },
+                "ticker": {
+                    "type": "string"
+                },
+                "uid": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_interfaces_http.futurePayload": {
+            "type": "object",
+            "properties": {
+                "asset_type": {
+                    "type": "string"
+                },
+                "class_code": {
+                    "type": "string"
+                },
+                "figi": {
+                    "type": "string"
+                },
+                "logo_url": {
+                    "type": "string"
+                },
+                "lot": {
+                    "type": "integer"
+                },
+                "min_price_increment": {
+                    "type": "number"
+                },
+                "min_price_increment_amount": {
+                    "type": "number"
+                },
+                "ticker": {
+                    "type": "string"
+                },
+                "uid": {
+                    "type": "string"
+                }
+            }
+        },
         "internal_interfaces_http.instrumentPayload": {
             "type": "object",
             "properties": {
@@ -1196,7 +2041,223 @@ const docTemplate = `{
                 }
             }
         },
+        "internal_interfaces_http.sharePayload": {
+            "type": "object",
+            "properties": {
+                "class_code": {
+                    "type": "string"
+                },
+                "figi": {
+                    "type": "string"
+                },
+                "logo_url": {
+                    "type": "string"
+                },
+                "lot": {
+                    "type": "integer"
+                },
+                "ticker": {
+                    "type": "string"
+                },
+                "uid": {
+                    "type": "string"
+                }
+            }
+        },
+        "main_internal_domain_entity_instruments.AssetType": {
+            "type": "string",
+            "enum": [
+                "TYPE_INDEX",
+                "TYPE_COMMODITY",
+                "TYPE_SECURITY",
+                "TYPE_CURRENCY"
+            ],
+            "x-enum-varnames": [
+                "AssetTypeIndex",
+                "AssetTypeCommodity",
+                "AssetTypeSecurity",
+                "AssetTypeCurrency"
+            ]
+        },
+        "main_internal_domain_entity_instruments.Bond": {
+            "type": "object",
+            "properties": {
+                "aciValue": {
+                    "type": "number"
+                },
+                "classCode": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "type": "string"
+                },
+                "figi": {
+                    "type": "string"
+                },
+                "logoURL": {
+                    "type": "string"
+                },
+                "lot": {
+                    "type": "integer"
+                },
+                "nominal": {
+                    "type": "number"
+                },
+                "ticker": {
+                    "type": "string"
+                },
+                "uid": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "main_internal_domain_entity_instruments.Currency": {
+            "type": "object",
+            "properties": {
+                "classCode": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "type": "string"
+                },
+                "figi": {
+                    "type": "string"
+                },
+                "logoURL": {
+                    "type": "string"
+                },
+                "lot": {
+                    "type": "integer"
+                },
+                "ticker": {
+                    "type": "string"
+                },
+                "uid": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "main_internal_domain_entity_instruments.Etf": {
+            "type": "object",
+            "properties": {
+                "classCode": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "type": "string"
+                },
+                "figi": {
+                    "type": "string"
+                },
+                "logoURL": {
+                    "type": "string"
+                },
+                "lot": {
+                    "type": "integer"
+                },
+                "minPriceIncrement": {
+                    "type": "number"
+                },
+                "ticker": {
+                    "type": "string"
+                },
+                "uid": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "main_internal_domain_entity_instruments.Future": {
+            "type": "object",
+            "properties": {
+                "assetType": {
+                    "$ref": "#/definitions/main_internal_domain_entity_instruments.AssetType"
+                },
+                "classCode": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "type": "string"
+                },
+                "figi": {
+                    "type": "string"
+                },
+                "logoURL": {
+                    "type": "string"
+                },
+                "lot": {
+                    "type": "integer"
+                },
+                "minPriceIncrement": {
+                    "type": "number"
+                },
+                "minPriceIncrementAmount": {
+                    "type": "number"
+                },
+                "ticker": {
+                    "type": "string"
+                },
+                "uid": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
         "main_internal_domain_entity_instruments.Instrument": {
+            "type": "object",
+            "properties": {
+                "classCode": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "type": "string"
+                },
+                "figi": {
+                    "type": "string"
+                },
+                "logoURL": {
+                    "type": "string"
+                },
+                "lot": {
+                    "type": "integer"
+                },
+                "ticker": {
+                    "type": "string"
+                },
+                "uid": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "main_internal_domain_entity_instruments.Share": {
             "type": "object",
             "properties": {
                 "classCode": {
