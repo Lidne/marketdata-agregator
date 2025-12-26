@@ -8,6 +8,7 @@ import (
 	"syscall"
 	"time"
 
+	_ "main/docs"
 	appinstruments "main/internal/application/service/instruments"
 	appmarketdata "main/internal/application/service/marketdata"
 	"main/internal/config"

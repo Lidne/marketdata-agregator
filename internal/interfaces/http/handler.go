@@ -1,3 +1,18 @@
+// @title           Market Data Aggregator API
+// @version         1.0
+// @description     API for managing financial instruments and market data
+// @termsOfService  http://swagger.io/terms/
+
+// @contact.name   API Support
+// @contact.url    http://www.swagger.io/support
+// @contact.email  support@swagger.io
+
+// @license.name  Apache 2.0
+// @license.url   http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host      localhost:8080
+// @BasePath  /api/v1
+
 package http
 
 import (
@@ -17,6 +32,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 const (
@@ -60,6 +77,8 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) registerRoutes() {
+	h.router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
 	inst := h.router.Group(instrumentsBasePath)
 	if h.cache != nil {
 		inst.Use(h.cacheMiddleware())
@@ -110,6 +129,17 @@ func (h *Handler) registerRoutes() {
 
 // Instruments handlers
 
+// createInstrument creates a new instrument
+// @Summary      Create instrument
+// @Description  Create a new financial instrument
+// @Tags         instruments
+// @Accept       json
+// @Produce      json
+// @Param        instrument  body      instrumentPayload  true  "Instrument data"
+// @Success      201         {object}  domaininstruments.Instrument
+// @Failure      400         {object}  map[string]string
+// @Failure      500         {object}  map[string]string
+// @Router       /instruments [post]
 func (h *Handler) createInstrument(c *gin.Context) {
 	var payload instrumentPayload
 	if err := c.ShouldBindJSON(&payload); err != nil {
@@ -128,6 +158,17 @@ func (h *Handler) createInstrument(c *gin.Context) {
 	c.JSON(http.StatusCreated, inst)
 }
 
+// updateInstrument updates an existing instrument
+// @Summary      Update instrument
+// @Description  Update an existing financial instrument
+// @Tags         instruments
+// @Accept       json
+// @Produce      json
+// @Param        instrument  body      instrumentPayload  true  "Instrument data with UID"
+// @Success      200         {object}  domaininstruments.Instrument
+// @Failure      400         {object}  map[string]string
+// @Failure      500         {object}  map[string]string
+// @Router       /instruments [put]
 func (h *Handler) updateInstrument(c *gin.Context) {
 	var payload instrumentPayload
 	if err := c.ShouldBindJSON(&payload); err != nil {
@@ -150,6 +191,17 @@ func (h *Handler) updateInstrument(c *gin.Context) {
 	c.JSON(http.StatusOK, inst)
 }
 
+// getInstrument retrieves an instrument by UID
+// @Summary      Get instrument
+// @Description  Get a financial instrument by UID
+// @Tags         instruments
+// @Accept       json
+// @Produce      json
+// @Param        uid   query     string  true  "Instrument UID"
+// @Success      200   {object}  domaininstruments.Instrument
+// @Failure      400   {object}  map[string]string
+// @Failure      500   {object}  map[string]string
+// @Router       /instruments [get]
 func (h *Handler) getInstrument(c *gin.Context) {
 	uidStr := c.Query("uid")
 	uid, err := uuid.Parse(uidStr)
@@ -165,6 +217,17 @@ func (h *Handler) getInstrument(c *gin.Context) {
 	c.JSON(http.StatusOK, inst)
 }
 
+// deleteInstrument deletes an instrument by UID
+// @Summary      Delete instrument
+// @Description  Delete a financial instrument by UID
+// @Tags         instruments
+// @Accept       json
+// @Produce      json
+// @Param        uid   query     string  true  "Instrument UID"
+// @Success      204   "No Content"
+// @Failure      400   {object}  map[string]string
+// @Failure      500   {object}  map[string]string
+// @Router       /instruments [delete]
 func (h *Handler) deleteInstrument(c *gin.Context) {
 	uidStr := c.Query("uid")
 	uid, err := uuid.Parse(uidStr)
@@ -179,30 +242,85 @@ func (h *Handler) deleteInstrument(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
+// getShare retrieves a share instrument by UID
+// @Summary      Get share
+// @Description  Get a share instrument by UID
+// @Tags         instruments
+// @Accept       json
+// @Produce      json
+// @Param        uid   path      string  true  "Share UID"
+// @Success      200   {object}  map[string]interface{}
+// @Failure      400   {object}  map[string]string
+// @Failure      500   {object}  map[string]string
+// @Router       /instruments/shares/{uid} [get]
 func (h *Handler) getShare(c *gin.Context) {
 	h.handleTypedInstrument(c, func(ctx context.Context, uid uuid.UUID) (interface{}, error) {
 		return h.instruments.GetShare(ctx, uid)
 	})
 }
 
+// getBond retrieves a bond instrument by UID
+// @Summary      Get bond
+// @Description  Get a bond instrument by UID
+// @Tags         instruments
+// @Accept       json
+// @Produce      json
+// @Param        uid   path      string  true  "Bond UID"
+// @Success      200   {object}  map[string]interface{}
+// @Failure      400   {object}  map[string]string
+// @Failure      500   {object}  map[string]string
+// @Router       /instruments/bonds/{uid} [get]
 func (h *Handler) getBond(c *gin.Context) {
 	h.handleTypedInstrument(c, func(ctx context.Context, uid uuid.UUID) (interface{}, error) {
 		return h.instruments.GetBond(ctx, uid)
 	})
 }
 
+// getFuture retrieves a future instrument by UID
+// @Summary      Get future
+// @Description  Get a future instrument by UID
+// @Tags         instruments
+// @Accept       json
+// @Produce      json
+// @Param        uid   path      string  true  "Future UID"
+// @Success      200   {object}  map[string]interface{}
+// @Failure      400   {object}  map[string]string
+// @Failure      500   {object}  map[string]string
+// @Router       /instruments/futures/{uid} [get]
 func (h *Handler) getFuture(c *gin.Context) {
 	h.handleTypedInstrument(c, func(ctx context.Context, uid uuid.UUID) (interface{}, error) {
 		return h.instruments.GetFuture(ctx, uid)
 	})
 }
 
+// getCurrency retrieves a currency instrument by UID
+// @Summary      Get currency
+// @Description  Get a currency instrument by UID
+// @Tags         instruments
+// @Accept       json
+// @Produce      json
+// @Param        uid   path      string  true  "Currency UID"
+// @Success      200   {object}  map[string]interface{}
+// @Failure      400   {object}  map[string]string
+// @Failure      500   {object}  map[string]string
+// @Router       /instruments/currencies/{uid} [get]
 func (h *Handler) getCurrency(c *gin.Context) {
 	h.handleTypedInstrument(c, func(ctx context.Context, uid uuid.UUID) (interface{}, error) {
 		return h.instruments.GetCurrency(ctx, uid)
 	})
 }
 
+// getEtf retrieves an ETF instrument by UID
+// @Summary      Get ETF
+// @Description  Get an ETF instrument by UID
+// @Tags         instruments
+// @Accept       json
+// @Produce      json
+// @Param        uid   path      string  true  "ETF UID"
+// @Success      200   {object}  map[string]interface{}
+// @Failure      400   {object}  map[string]string
+// @Failure      500   {object}  map[string]string
+// @Router       /instruments/etfs/{uid} [get]
 func (h *Handler) getEtf(c *gin.Context) {
 	h.handleTypedInstrument(c, func(ctx context.Context, uid uuid.UUID) (interface{}, error) {
 		return h.instruments.GetEtf(ctx, uid)
@@ -225,6 +343,17 @@ func (h *Handler) handleTypedInstrument(c *gin.Context, fn func(ctx context.Cont
 
 // Market data handlers
 
+// addTrade adds a single trade
+// @Summary      Add trade
+// @Description  Add a single trade record
+// @Tags         marketdata
+// @Accept       json
+// @Produce      json
+// @Param        trade  body      domainmarketdata.Trade  true  "Trade data"
+// @Success      201    "Created"
+// @Failure      400    {object}  map[string]string
+// @Failure      500    {object}  map[string]string
+// @Router       /marketdata/trades [post]
 func (h *Handler) addTrade(c *gin.Context) {
 	var trade domainmarketdata.Trade
 	if err := c.ShouldBindJSON(&trade); err != nil {
@@ -238,6 +367,17 @@ func (h *Handler) addTrade(c *gin.Context) {
 	c.Status(http.StatusCreated)
 }
 
+// addTradesBatch adds multiple trades in a batch
+// @Summary      Add trades batch
+// @Description  Add multiple trade records in a single request
+// @Tags         marketdata
+// @Accept       json
+// @Produce      json
+// @Param        trades  body      []domainmarketdata.Trade  true  "Array of trade data"
+// @Success      201     "Created"
+// @Failure      400     {object}  map[string]string
+// @Failure      500     {object}  map[string]string
+// @Router       /marketdata/trades/batch [post]
 func (h *Handler) addTradesBatch(c *gin.Context) {
 	var trades []domainmarketdata.Trade
 	if err := c.ShouldBindJSON(&trades); err != nil {
@@ -251,6 +391,19 @@ func (h *Handler) addTradesBatch(c *gin.Context) {
 	c.Status(http.StatusCreated)
 }
 
+// getTradesRange retrieves trades within a time range
+// @Summary      Get trades range
+// @Description  Get trades for an instrument within a time range
+// @Tags         marketdata
+// @Accept       json
+// @Produce      json
+// @Param        instrument_uid  query     string  true  "Instrument UID"
+// @Param        from            query     string  true  "Start time (RFC3339)"
+// @Param        to              query     string  true  "End time (RFC3339)"
+// @Success      200             {array}   domainmarketdata.Trade
+// @Failure      400             {object}  map[string]string
+// @Failure      500             {object}  map[string]string
+// @Router       /marketdata/trades [get]
 func (h *Handler) getTradesRange(c *gin.Context) {
 	instrumentUID, err := parseUUIDQuery(c, "instrument_uid")
 	if err != nil {
@@ -270,6 +423,18 @@ func (h *Handler) getTradesRange(c *gin.Context) {
 	c.JSON(http.StatusOK, trades)
 }
 
+// getTradesLast retrieves the last N trades
+// @Summary      Get last trades
+// @Description  Get the last N trades for an instrument
+// @Tags         marketdata
+// @Accept       json
+// @Produce      json
+// @Param        instrument_uid  query     string  true  "Instrument UID"
+// @Param        limit           query     int     true  "Number of trades to retrieve"
+// @Success      200             {array}   domainmarketdata.Trade
+// @Failure      400             {object}  map[string]string
+// @Failure      500             {object}  map[string]string
+// @Router       /marketdata/trades/last [get]
 func (h *Handler) getTradesLast(c *gin.Context) {
 	instrumentUID, limit, err := h.parseInstrumentAndLimit(c)
 	if err != nil {
@@ -284,6 +449,17 @@ func (h *Handler) getTradesLast(c *gin.Context) {
 	c.JSON(http.StatusOK, trades)
 }
 
+// addCandle adds a single candle
+// @Summary      Add candle
+// @Description  Add a single candle record
+// @Tags         marketdata
+// @Accept       json
+// @Produce      json
+// @Param        candle  body      domainmarketdata.Candle  true  "Candle data"
+// @Success      201     "Created"
+// @Failure      400     {object}  map[string]string
+// @Failure      500     {object}  map[string]string
+// @Router       /marketdata/candles [post]
 func (h *Handler) addCandle(c *gin.Context) {
 	var candle domainmarketdata.Candle
 	if err := c.ShouldBindJSON(&candle); err != nil {
@@ -297,6 +473,17 @@ func (h *Handler) addCandle(c *gin.Context) {
 	c.Status(http.StatusCreated)
 }
 
+// addCandlesBatch adds multiple candles in a batch
+// @Summary      Add candles batch
+// @Description  Add multiple candle records in a single request
+// @Tags         marketdata
+// @Accept       json
+// @Produce      json
+// @Param        candles  body      []domainmarketdata.Candle  true  "Array of candle data"
+// @Success      201      "Created"
+// @Failure      400      {object}  map[string]string
+// @Failure      500      {object}  map[string]string
+// @Router       /marketdata/candles/batch [post]
 func (h *Handler) addCandlesBatch(c *gin.Context) {
 	var candles []domainmarketdata.Candle
 	if err := c.ShouldBindJSON(&candles); err != nil {
@@ -310,6 +497,20 @@ func (h *Handler) addCandlesBatch(c *gin.Context) {
 	c.Status(http.StatusCreated)
 }
 
+// getCandlesRange retrieves candles within a time range
+// @Summary      Get candles range
+// @Description  Get candles for an instrument within a time range
+// @Tags         marketdata
+// @Accept       json
+// @Produce      json
+// @Param        instrument_uid   query     string  true  "Instrument UID"
+// @Param        interval_seconds query     int64   true  "Candle interval in seconds"
+// @Param        from             query     string  true  "Start time (RFC3339)"
+// @Param        to               query     string  true  "End time (RFC3339)"
+// @Success      200              {array}   domainmarketdata.Candle
+// @Failure      400              {object}  map[string]string
+// @Failure      500              {object}  map[string]string
+// @Router       /marketdata/candles [get]
 func (h *Handler) getCandlesRange(c *gin.Context) {
 	instrumentUID, err := parseUUIDQuery(c, "instrument_uid")
 	if err != nil {
@@ -334,6 +535,19 @@ func (h *Handler) getCandlesRange(c *gin.Context) {
 	c.JSON(http.StatusOK, candles)
 }
 
+// getCandlesLast retrieves the last N candles
+// @Summary      Get last candles
+// @Description  Get the last N candles for an instrument
+// @Tags         marketdata
+// @Accept       json
+// @Produce      json
+// @Param        instrument_uid   query     string  true  "Instrument UID"
+// @Param        interval_seconds query     int64   true  "Candle interval in seconds"
+// @Param        limit            query     int     true  "Number of candles to retrieve"
+// @Success      200              {array}   domainmarketdata.Candle
+// @Failure      400              {object}  map[string]string
+// @Failure      500              {object}  map[string]string
+// @Router       /marketdata/candles/last [get]
 func (h *Handler) getCandlesLast(c *gin.Context) {
 	instrumentUID, limit, interval, err := h.parseInstrumentLimitInterval(c)
 	if err != nil {
@@ -348,6 +562,17 @@ func (h *Handler) getCandlesLast(c *gin.Context) {
 	c.JSON(http.StatusOK, candles)
 }
 
+// addOrderBook adds a single order book snapshot
+// @Summary      Add order book
+// @Description  Add a single order book snapshot
+// @Tags         marketdata
+// @Accept       json
+// @Produce      json
+// @Param        orderbook  body      domainmarketdata.OrderBookSnapshot  true  "Order book snapshot data"
+// @Success      201        "Created"
+// @Failure      400        {object}  map[string]string
+// @Failure      500        {object}  map[string]string
+// @Router       /marketdata/orderbooks [post]
 func (h *Handler) addOrderBook(c *gin.Context) {
 	var snapshot domainmarketdata.OrderBookSnapshot
 	if err := c.ShouldBindJSON(&snapshot); err != nil {
@@ -361,6 +586,17 @@ func (h *Handler) addOrderBook(c *gin.Context) {
 	c.Status(http.StatusCreated)
 }
 
+// addOrderBooksBatch adds multiple order book snapshots in a batch
+// @Summary      Add order books batch
+// @Description  Add multiple order book snapshots in a single request
+// @Tags         marketdata
+// @Accept       json
+// @Produce      json
+// @Param        orderbooks  body      []domainmarketdata.OrderBookSnapshot  true  "Array of order book snapshot data"
+// @Success      201         "Created"
+// @Failure      400         {object}  map[string]string
+// @Failure      500         {object}  map[string]string
+// @Router       /marketdata/orderbooks/batch [post]
 func (h *Handler) addOrderBooksBatch(c *gin.Context) {
 	var snapshots []domainmarketdata.OrderBookSnapshot
 	if err := c.ShouldBindJSON(&snapshots); err != nil {
@@ -374,6 +610,20 @@ func (h *Handler) addOrderBooksBatch(c *gin.Context) {
 	c.Status(http.StatusCreated)
 }
 
+// getOrderBooksRange retrieves order book snapshots within a time range
+// @Summary      Get order books range
+// @Description  Get order book snapshots for an instrument within a time range
+// @Tags         marketdata
+// @Accept       json
+// @Produce      json
+// @Param        instrument_uid  query     string  true  "Instrument UID"
+// @Param        depth           query     int     true  "Order book depth"
+// @Param        from            query     string  true  "Start time (RFC3339)"
+// @Param        to              query     string  true  "End time (RFC3339)"
+// @Success      200             {array}   domainmarketdata.OrderBookSnapshot
+// @Failure      400             {object}  map[string]string
+// @Failure      500             {object}  map[string]string
+// @Router       /marketdata/orderbooks [get]
 func (h *Handler) getOrderBooksRange(c *gin.Context) {
 	instrumentUID, err := parseUUIDQuery(c, "instrument_uid")
 	if err != nil {
@@ -398,6 +648,19 @@ func (h *Handler) getOrderBooksRange(c *gin.Context) {
 	c.JSON(http.StatusOK, snapshots)
 }
 
+// getOrderBooksLast retrieves the last N order book snapshots
+// @Summary      Get last order books
+// @Description  Get the last N order book snapshots for an instrument
+// @Tags         marketdata
+// @Accept       json
+// @Produce      json
+// @Param        instrument_uid  query     string  true  "Instrument UID"
+// @Param        depth           query     int     true  "Order book depth"
+// @Param        limit           query     int     true  "Number of snapshots to retrieve"
+// @Success      200             {array}   domainmarketdata.OrderBookSnapshot
+// @Failure      400             {object}  map[string]string
+// @Failure      500             {object}  map[string]string
+// @Router       /marketdata/orderbooks/last [get]
 func (h *Handler) getOrderBooksLast(c *gin.Context) {
 	instrumentUID, limit, err := h.parseInstrumentAndLimit(c)
 	if err != nil {

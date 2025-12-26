@@ -1,0 +1,895 @@
+definitions:
+  internal_interfaces_http.instrumentPayload:
+    properties:
+      class_code:
+        type: string
+      figi:
+        type: string
+      logo_url:
+        type: string
+      lot:
+        type: integer
+      ticker:
+        type: string
+      uid:
+        type: string
+    type: object
+  main_internal_domain_entity_instruments.Instrument:
+    properties:
+      classCode:
+        type: string
+      createdAt:
+        type: string
+      deletedAt:
+        type: string
+      figi:
+        type: string
+      logoURL:
+        type: string
+      lot:
+        type: integer
+      ticker:
+        type: string
+      uid:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  main_internal_domain_entity_marketdata.Candle:
+    properties:
+      close:
+        type: number
+      high:
+        type: number
+      id:
+        type: string
+      instrumentUID:
+        type: string
+      intervalSeconds:
+        type: integer
+      lastTradeAt:
+        type: string
+      low:
+        type: number
+      metadata:
+        additionalProperties: {}
+        type: object
+      open:
+        type: number
+      periodStart:
+        type: string
+      volumeBuyLots:
+        type: integer
+      volumeLots:
+        type: integer
+      volumeSellLots:
+        type: integer
+    type: object
+  main_internal_domain_entity_marketdata.OrderBookLevel:
+    properties:
+      price:
+        type: number
+      quantity:
+        type: integer
+    type: object
+  main_internal_domain_entity_marketdata.OrderBookSnapshot:
+    properties:
+      asks:
+        items:
+          $ref: '#/definitions/main_internal_domain_entity_marketdata.OrderBookLevel'
+        type: array
+      bids:
+        items:
+          $ref: '#/definitions/main_internal_domain_entity_marketdata.OrderBookLevel'
+        type: array
+      depth:
+        type: integer
+      id:
+        type: string
+      instrumentUID:
+        type: string
+      metadata:
+        additionalProperties: {}
+        type: object
+      snapshotAt:
+        type: string
+    type: object
+  main_internal_domain_entity_marketdata.Trade:
+    properties:
+      id:
+        type: string
+      instrumentUID:
+        type: string
+      metadata:
+        additionalProperties: {}
+        type: object
+      price:
+        type: number
+      quantityLots:
+        type: integer
+      side:
+        $ref: '#/definitions/main_internal_domain_entity_marketdata.TradeSide'
+      tradedAt:
+        type: string
+    type: object
+  main_internal_domain_entity_marketdata.TradeSide:
+    enum:
+    - BUY
+    - SELL
+    type: string
+    x-enum-varnames:
+    - TradeSideBuy
+    - TradeSideSell
+info:
+  contact: {}
+paths:
+  /instruments:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a financial instrument by UID
+      parameters:
+      - description: Instrument UID
+        in: query
+        name: uid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete instrument
+      tags:
+      - instruments
+    get:
+      consumes:
+      - application/json
+      description: Get a financial instrument by UID
+      parameters:
+      - description: Instrument UID
+        in: query
+        name: uid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main_internal_domain_entity_instruments.Instrument'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get instrument
+      tags:
+      - instruments
+    post:
+      consumes:
+      - application/json
+      description: Create a new financial instrument
+      parameters:
+      - description: Instrument data
+        in: body
+        name: instrument
+        required: true
+        schema:
+          $ref: '#/definitions/internal_interfaces_http.instrumentPayload'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/main_internal_domain_entity_instruments.Instrument'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create instrument
+      tags:
+      - instruments
+    put:
+      consumes:
+      - application/json
+      description: Update an existing financial instrument
+      parameters:
+      - description: Instrument data with UID
+        in: body
+        name: instrument
+        required: true
+        schema:
+          $ref: '#/definitions/internal_interfaces_http.instrumentPayload'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main_internal_domain_entity_instruments.Instrument'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update instrument
+      tags:
+      - instruments
+  /instruments/bonds/{uid}:
+    get:
+      consumes:
+      - application/json
+      description: Get a bond instrument by UID
+      parameters:
+      - description: Bond UID
+        in: path
+        name: uid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get bond
+      tags:
+      - instruments
+  /instruments/currencies/{uid}:
+    get:
+      consumes:
+      - application/json
+      description: Get a currency instrument by UID
+      parameters:
+      - description: Currency UID
+        in: path
+        name: uid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get currency
+      tags:
+      - instruments
+  /instruments/etfs/{uid}:
+    get:
+      consumes:
+      - application/json
+      description: Get an ETF instrument by UID
+      parameters:
+      - description: ETF UID
+        in: path
+        name: uid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get ETF
+      tags:
+      - instruments
+  /instruments/futures/{uid}:
+    get:
+      consumes:
+      - application/json
+      description: Get a future instrument by UID
+      parameters:
+      - description: Future UID
+        in: path
+        name: uid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get future
+      tags:
+      - instruments
+  /instruments/shares/{uid}:
+    get:
+      consumes:
+      - application/json
+      description: Get a share instrument by UID
+      parameters:
+      - description: Share UID
+        in: path
+        name: uid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get share
+      tags:
+      - instruments
+  /marketdata/candles:
+    get:
+      consumes:
+      - application/json
+      description: Get candles for an instrument within a time range
+      parameters:
+      - description: Instrument UID
+        in: query
+        name: instrument_uid
+        required: true
+        type: string
+      - description: Candle interval in seconds
+        in: query
+        name: interval_seconds
+        required: true
+        type: integer
+      - description: Start time (RFC3339)
+        in: query
+        name: from
+        required: true
+        type: string
+      - description: End time (RFC3339)
+        in: query
+        name: to
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/main_internal_domain_entity_marketdata.Candle'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get candles range
+      tags:
+      - marketdata
+    post:
+      consumes:
+      - application/json
+      description: Add a single candle record
+      parameters:
+      - description: Candle data
+        in: body
+        name: candle
+        required: true
+        schema:
+          $ref: '#/definitions/main_internal_domain_entity_marketdata.Candle'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Add candle
+      tags:
+      - marketdata
+  /marketdata/candles/batch:
+    post:
+      consumes:
+      - application/json
+      description: Add multiple candle records in a single request
+      parameters:
+      - description: Array of candle data
+        in: body
+        name: candles
+        required: true
+        schema:
+          items:
+            $ref: '#/definitions/main_internal_domain_entity_marketdata.Candle'
+          type: array
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Add candles batch
+      tags:
+      - marketdata
+  /marketdata/candles/last:
+    get:
+      consumes:
+      - application/json
+      description: Get the last N candles for an instrument
+      parameters:
+      - description: Instrument UID
+        in: query
+        name: instrument_uid
+        required: true
+        type: string
+      - description: Candle interval in seconds
+        in: query
+        name: interval_seconds
+        required: true
+        type: integer
+      - description: Number of candles to retrieve
+        in: query
+        name: limit
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/main_internal_domain_entity_marketdata.Candle'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get last candles
+      tags:
+      - marketdata
+  /marketdata/orderbooks:
+    get:
+      consumes:
+      - application/json
+      description: Get order book snapshots for an instrument within a time range
+      parameters:
+      - description: Instrument UID
+        in: query
+        name: instrument_uid
+        required: true
+        type: string
+      - description: Order book depth
+        in: query
+        name: depth
+        required: true
+        type: integer
+      - description: Start time (RFC3339)
+        in: query
+        name: from
+        required: true
+        type: string
+      - description: End time (RFC3339)
+        in: query
+        name: to
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/main_internal_domain_entity_marketdata.OrderBookSnapshot'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get order books range
+      tags:
+      - marketdata
+    post:
+      consumes:
+      - application/json
+      description: Add a single order book snapshot
+      parameters:
+      - description: Order book snapshot data
+        in: body
+        name: orderbook
+        required: true
+        schema:
+          $ref: '#/definitions/main_internal_domain_entity_marketdata.OrderBookSnapshot'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Add order book
+      tags:
+      - marketdata
+  /marketdata/orderbooks/batch:
+    post:
+      consumes:
+      - application/json
+      description: Add multiple order book snapshots in a single request
+      parameters:
+      - description: Array of order book snapshot data
+        in: body
+        name: orderbooks
+        required: true
+        schema:
+          items:
+            $ref: '#/definitions/main_internal_domain_entity_marketdata.OrderBookSnapshot'
+          type: array
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Add order books batch
+      tags:
+      - marketdata
+  /marketdata/orderbooks/last:
+    get:
+      consumes:
+      - application/json
+      description: Get the last N order book snapshots for an instrument
+      parameters:
+      - description: Instrument UID
+        in: query
+        name: instrument_uid
+        required: true
+        type: string
+      - description: Order book depth
+        in: query
+        name: depth
+        required: true
+        type: integer
+      - description: Number of snapshots to retrieve
+        in: query
+        name: limit
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/main_internal_domain_entity_marketdata.OrderBookSnapshot'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get last order books
+      tags:
+      - marketdata
+  /marketdata/trades:
+    get:
+      consumes:
+      - application/json
+      description: Get trades for an instrument within a time range
+      parameters:
+      - description: Instrument UID
+        in: query
+        name: instrument_uid
+        required: true
+        type: string
+      - description: Start time (RFC3339)
+        in: query
+        name: from
+        required: true
+        type: string
+      - description: End time (RFC3339)
+        in: query
+        name: to
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/main_internal_domain_entity_marketdata.Trade'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get trades range
+      tags:
+      - marketdata
+    post:
+      consumes:
+      - application/json
+      description: Add a single trade record
+      parameters:
+      - description: Trade data
+        in: body
+        name: trade
+        required: true
+        schema:
+          $ref: '#/definitions/main_internal_domain_entity_marketdata.Trade'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Add trade
+      tags:
+      - marketdata
+  /marketdata/trades/batch:
+    post:
+      consumes:
+      - application/json
+      description: Add multiple trade records in a single request
+      parameters:
+      - description: Array of trade data
+        in: body
+        name: trades
+        required: true
+        schema:
+          items:
+            $ref: '#/definitions/main_internal_domain_entity_marketdata.Trade'
+          type: array
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Add trades batch
+      tags:
+      - marketdata
+  /marketdata/trades/last:
+    get:
+      consumes:
+      - application/json
+      description: Get the last N trades for an instrument
+      parameters:
+      - description: Instrument UID
+        in: query
+        name: instrument_uid
+        required: true
+        type: string
+      - description: Number of trades to retrieve
+        in: query
+        name: limit
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/main_internal_domain_entity_marketdata.Trade'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get last trades
+      tags:
+      - marketdata
+swagger: "2.0"
