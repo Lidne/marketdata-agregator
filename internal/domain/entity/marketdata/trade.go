@@ -16,11 +16,11 @@ const (
 
 // Trade models a single executed trade (see docs/marketdata_doc.md).
 type Trade struct {
-	ID            uuid.UUID
-	InstrumentUID uuid.UUID
-	Side          TradeSide
-	Price         float64
-	QuantityLots  int64
-	TradedAt      time.Time
-	Metadata      map[string]any
+	ID            uuid.UUID      `json:"id"`
+	InstrumentUID uuid.UUID      `json:"instrument_uid"`
+	Side          TradeSide      `json:"side"`
+	Price         float64        `json:"price"`
+	QuantityLots  int64          `json:"quantity_lots"`
+	TradedAt      time.Time      `json:"traded_at"`
+	Metadata      map[string]any `json:"metadata,omitempty"`
 }

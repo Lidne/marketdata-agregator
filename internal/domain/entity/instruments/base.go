@@ -68,6 +68,7 @@ type Instrument struct {
 	Lot       int32
 	ClassCode string
 	LogoURL   string
+	BrandUID  uuid.UUID
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	DeletedAt *time.Time

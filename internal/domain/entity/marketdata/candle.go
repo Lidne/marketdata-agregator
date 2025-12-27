@@ -8,17 +8,17 @@ import (
 
 // Candle represents an OHLCV record for a specific interval (docs/marketdata_doc.md).
 type Candle struct {
-	ID              uuid.UUID
-	InstrumentUID   uuid.UUID
-	IntervalSeconds int64
-	PeriodStart     time.Time
-	Open            float64
-	High            float64
-	Low             float64
-	Close           float64
-	VolumeLots      int64
-	VolumeBuyLots   *int64
-	VolumeSellLots  *int64
-	LastTradeAt     *time.Time
-	Metadata        map[string]any
+	ID              uuid.UUID      `json:"id"`
+	InstrumentUID   uuid.UUID      `json:"instrument_uid"`
+	IntervalSeconds int64          `json:"interval_seconds"`
+	PeriodStart     time.Time      `json:"period_start"`
+	Open            float64        `json:"open"`
+	High            float64        `json:"high"`
+	Low             float64        `json:"low"`
+	Close           float64        `json:"close"`
+	VolumeLots      int64          `json:"volume_lots"`
+	VolumeBuyLots   *int64         `json:"volume_buy_lots,omitempty"`
+	VolumeSellLots  *int64         `json:"volume_sell_lots,omitempty"`
+	LastTradeAt     *time.Time     `json:"last_trade_at,omitempty"`
+	Metadata        map[string]any `json:"metadata,omitempty"`
 }

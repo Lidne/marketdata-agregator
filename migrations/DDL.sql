@@ -1,3 +1,35 @@
+-- Компании
+CREATE TABLE companies (
+    uid UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name VARCHAR(255) NOT NULL
+);
+
+-- Секторы
+CREATE TABLE sectors (
+    uid UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name VARCHAR(255) NOT NULL,
+    volatility INT NOT NULL CHECK (volatility >= 0 AND volatility < 100)
+);
+
+-- Страны
+CREATE TABLE countries (
+    alfa_two CHAR(2) PRIMARY KEY,
+    alfa_three CHAR(3) NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    name_brief VARCHAR(255)
+);
+
+-- Бренды
+CREATE TABLE brands (
+    uid UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    info TEXT,
+    company_uid UUID NOT NULL REFERENCES companies(uid) ON DELETE RESTRICT,
+    sector_uid UUID NOT NULL REFERENCES sectors(uid) ON DELETE RESTRICT,
+    country_code CHAR(2) NOT NULL REFERENCES countries(alfa_two) ON DELETE RESTRICT
+);
+
 CREATE TABLE instruments (
     uid UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     figi VARCHAR(255) UNIQUE NOT NULL,
@@ -5,6 +37,7 @@ CREATE TABLE instruments (
     lot INTEGER NOT NULL,
     class_code VARCHAR(50),
     logo_url VARCHAR,
+    brand_uid UUID NOT NULL REFERENCES brands(uid) ON DELETE RESTRICT,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW(),
     deleted_at TIMESTAMPTZ
