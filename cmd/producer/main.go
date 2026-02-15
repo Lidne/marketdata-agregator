@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/joho/godotenv"
 	amqp "github.com/rabbitmq/amqp091-go"
 	investgo "github.com/russianinvestments/invest-api-go-sdk/investgo"
 	pb "github.com/russianinvestments/invest-api-go-sdk/proto"
@@ -55,6 +56,8 @@ type exchangeSet struct {
 }
 
 func main() {
+	godotenv.Load(".env")
+
 	logger := logrus.New()
 	logger.SetFormatter(&logrus.JSONFormatter{})
 

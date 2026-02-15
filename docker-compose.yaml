@@ -1,10 +1,8 @@
-version: '3.8'
-
 services:
   timescaledb:
     image: timescale/timescaledb:latest-pg16
     container_name: timescaledb
-    restart: always
+    restart: unless-stopped
     environment:
       - POSTGRES_PASSWORD=test
       - POSTGRES_USER=postgres
@@ -34,7 +32,6 @@ services:
     environment:
       PGADMIN_DEFAULT_EMAIL: "george.ermekov@gmail.com"
       PGADMIN_DEFAULT_PASSWORD: "1111"
-      SCRIPT_NAME: /pgadmin
     ports:
       - "5433:80"
     volumes:
@@ -45,6 +42,21 @@ services:
       options:
         max-size: 10m
 
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq:3-management
+    restart: always
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    networks:
+      - main
+
 networks:
   main:
     driver: bridge
@@ -53,3 +65,4 @@ volumes:
   pg_data:
   redis-data:
   pgadmin_data:
+  rabbitmq_data:
