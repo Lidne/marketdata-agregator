@@ -150,10 +150,7 @@ CREATE TABLE order_book_snapshots (
 
     snapshot_at TIMESTAMPTZ NOT NULL,
     depth INT NOT NULL,
-
--- массив уровней: [{"price": 123.45, "quantity": 100}, ...]
-
-bids JSONB NOT NULL,
+    bids JSONB NOT NULL,
     asks JSONB NOT NULL,
 
     metadata JSONB,

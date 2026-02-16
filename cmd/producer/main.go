@@ -22,11 +22,12 @@ import (
 	"github.com/sirupsen/logrus"
 	"golang.org/x/sync/errgroup"
 
+	"main/internal/infrastructure/broker"
 	domain "main/internal/domain/entity/marketdata"
 )
 
 const (
-	defaultInvestEndpoint     = "https://invest-public-api.tinkoff.ru:443"
+	defaultInvestEndpoint     = "invest-public-api.tinkoff.ru:443"
 	defaultAppName            = "marketdata-producer"
 	defaultRabbitURL          = "amqp://guest:guest@localhost:5672/"
 	defaultInstrumentsFile    = "cmd/producer/instruments.json"
@@ -295,15 +296,15 @@ func (p *publisher) Close() {
 }
 
 func (p *publisher) PublishCandle(ctx context.Context, candle *domain.Candle) error {
-	return p.publish(ctx, p.exchanges.Candles, candle)
+	return p.publish(ctx, p.exchanges.Candles, broker.BaseMessage{Candle: candle})
 }
 
 func (p *publisher) PublishTrade(ctx context.Context, trade *domain.Trade) error {
-	return p.publish(ctx, p.exchanges.Trades, trade)
+	return p.publish(ctx, p.exchanges.Trades, broker.BaseMessage{Trade: trade})
 }
 
 func (p *publisher) PublishOrderBook(ctx context.Context, snapshot *domain.OrderBookSnapshot) error {
-	return p.publish(ctx, p.exchanges.OrderBooks, snapshot)
+	return p.publish(ctx, p.exchanges.OrderBooks, broker.BaseMessage{OrderBookSnapshot: snapshot})
 }
 
 func (p *publisher) publish(ctx context.Context, exchange string, payload any) error {

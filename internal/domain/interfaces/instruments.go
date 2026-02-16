@@ -11,6 +11,7 @@ import (
 type InstrumentsRepository interface {
 	CreateInstrument(ctx context.Context, instrument *domain.Instrument) error
 	GetInstrument(ctx context.Context, uid uuid.UUID) (*domain.Instrument, error)
+	GetInstrumentByFigi(ctx context.Context, figi string) (*domain.Instrument, error)
 	UpdateInstrument(ctx context.Context, instrument *domain.Instrument) error
 	DeleteInstrument(ctx context.Context, uid uuid.UUID) error
 	CreateShare(ctx context.Context, share *domain.Share) error

@@ -31,6 +31,10 @@ func (s *Service) GetInstrument(ctx context.Context, uid uuid.UUID) (*domain.Ins
 	return s.repo.GetInstrument(ctx, uid)
 }
 
+func (s *Service) GetInstrumentByFigi(ctx context.Context, figi string) (*domain.Instrument, error) {
+	return s.repo.GetInstrumentByFigi(ctx, figi)
+}
+
 func (s *Service) UpdateInstrument(ctx context.Context, instrument *domain.Instrument) error {
 	if instrument == nil {
 		return ErrNilInstrument

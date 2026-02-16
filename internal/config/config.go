@@ -18,9 +18,9 @@ const (
 	defaultRedisDB            = 0
 	defaultCacheTTLSeconds    = 30
 	defaultRabbitURL          = "amqp://guest:guest@localhost:5672/"
-	defaultTradesExchange     = "trades"
-	defaultCandlesExchange    = "candles"
-	defaultOrderBooksExchange = "orderbooks"
+	defaultTradesExchange     = "marketdata.trades"
+	defaultCandlesExchange    = "marketdata.candles"
+	defaultOrderBooksExchange = "marketdata.orderbooks"
 	defaultRabbitPrefetch     = 500
 	defaultBatchSize          = 2000
 	defaultBatchTimeoutMS     = 200

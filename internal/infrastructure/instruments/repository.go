@@ -60,6 +60,23 @@ func (r *Repository) GetInstrument(ctx context.Context, uid uuid.UUID) (*domain.
 	return instrument, nil
 }
 
+func (r *Repository) GetInstrumentByFigi(ctx context.Context, figi string) (*domain.Instrument, error) {
+	const query = `
+		SELECT uid, figi, ticker, lot, class_code, logo_url, created_at, updated_at, deleted_at
+		FROM instruments
+		WHERE figi = $1`
+
+	row := r.pool.QueryRow(ctx, query, figi)
+	instrument := &domain.Instrument{}
+	if err := scanInstrumentInto(row, instrument); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, ErrInstrumentNotFound
+		}
+		return nil, err
+	}
+	return instrument, nil
+}
+
 func (r *Repository) UpdateInstrument(ctx context.Context, instrument *domain.Instrument) error {
 	return r.updateInstrumentWith(ctx, r.pool, instrument)
 }

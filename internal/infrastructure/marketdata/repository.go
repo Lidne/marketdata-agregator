@@ -111,7 +111,7 @@ func (r *Repository) GetTradesBetween(ctx context.Context, instrumentUID uuid.UU
 	}
 	defer rows.Close()
 
-	var trades []domain.Trade
+	trades := make([]domain.Trade, 0)
 	for rows.Next() {
 		trade, err := scanTrade(rows)
 		if err != nil {
@@ -138,7 +138,7 @@ func (r *Repository) GetLastTrades(ctx context.Context, instrumentUID uuid.UUID,
 	}
 	defer rows.Close()
 
-	var trades []domain.Trade
+	trades := make([]domain.Trade, 0)
 	for rows.Next() {
 		trade, err := scanTrade(rows)
 		if err != nil {
@@ -281,7 +281,7 @@ func (r *Repository) GetCandlesBetween(ctx context.Context, instrumentUID uuid.U
 	}
 	defer rows.Close()
 
-	var candles []domain.Candle
+	candles := make([]domain.Candle, 0)
 	for rows.Next() {
 		candle, err := scanCandle(rows)
 		if err != nil {
@@ -311,7 +311,7 @@ func (r *Repository) GetLastCandles(ctx context.Context, instrumentUID uuid.UUID
 	}
 	defer rows.Close()
 
-	var candles []domain.Candle
+	candles := make([]domain.Candle, 0)
 	for rows.Next() {
 		candle, err := scanCandle(rows)
 		if err != nil {
@@ -469,7 +469,7 @@ func (r *Repository) GetOrderBookSnapshotsBetween(ctx context.Context, instrumen
 	}
 	defer rows.Close()
 
-	var snapshots []domain.OrderBookSnapshot
+	snapshots := make([]domain.OrderBookSnapshot, 0)
 	for rows.Next() {
 		snapshot, err := scanOrderBook(rows)
 		if err != nil {
@@ -496,7 +496,7 @@ func (r *Repository) GetLastOrderBookSnapshots(ctx context.Context, instrumentUI
 	}
 	defer rows.Close()
 
-	var snapshots []domain.OrderBookSnapshot
+	snapshots := make([]domain.OrderBookSnapshot, 0)
 	for rows.Next() {
 		snapshot, err := scanOrderBook(rows)
 		if err != nil {

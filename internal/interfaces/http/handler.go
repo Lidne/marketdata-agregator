@@ -24,6 +24,7 @@ import (
 	appinstruments "main/internal/application/service/instruments"
 	appmarketdata "main/internal/application/service/marketdata"
 	domaininstruments "main/internal/domain/entity/instruments"
+	infrainstruments "main/internal/infrastructure/instruments"
 	domainmarketdata "main/internal/domain/entity/marketdata"
 	"net/http"
 	"strconv"
@@ -59,6 +60,7 @@ var _ appinterfaces.HTTPHandler = (*Handler)(nil)
 
 func NewHandler(inst *appinstruments.Service, md *appmarketdata.Service, cache *redis.Client, cacheTTL time.Duration) *Handler {
 	router := gin.New()
+	router.RedirectTrailingSlash = false
 	router.Use(gin.Recovery())
 
 	h := &Handler{
@@ -120,29 +122,118 @@ func (h *Handler) registerRoutes() {
 		md.Use(h.cacheMiddleware())
 	}
 	{
+		md.GET("/range", h.getMarketDataRange)
+
 		trades := md.Group("/trades")
 		{
-			trades.POST("/", h.addTrade)
+			trades.POST("", h.addTrade)
 			trades.POST("/batch", h.addTradesBatch)
-			trades.GET("/", h.getTradesRange)
+			trades.GET("", h.getTradesRange)
 			trades.GET("/last", h.getTradesLast)
 		}
 
 		candles := md.Group("/candles")
 		{
-			candles.POST("/", h.addCandle)
+			candles.POST("", h.addCandle)
 			candles.POST("/batch", h.addCandlesBatch)
-			candles.GET("/", h.getCandlesRange)
+			candles.GET("", h.getCandlesRange)
 			candles.GET("/last", h.getCandlesLast)
 		}
 
 		orderbooks := md.Group("/orderbooks")
 		{
-			orderbooks.POST("/", h.addOrderBook)
+			orderbooks.POST("", h.addOrderBook)
 			orderbooks.POST("/batch", h.addOrderBooksBatch)
-			orderbooks.GET("/", h.getOrderBooksRange)
+			orderbooks.GET("", h.getOrderBooksRange)
 			orderbooks.GET("/last", h.getOrderBooksLast)
 		}
+	}
+}
+
+// getMarketDataRange returns market data by FIGI within a time range
+// @Summary      Get market data by FIGI
+// @Description  Get trades, candles or order book snapshots for an instrument by FIGI within a time range
+// @Tags         marketdata
+// @Accept       json
+// @Produce      json
+// @Param        figi             query     string  true   "Instrument FIGI"
+// @Param        from             query     string  true   "Start time (ISO 8601/RFC3339)"
+// @Param        to               query     string  true   "End time (ISO 8601/RFC3339)"
+// @Param        data_type        query     string  true   "Data type: trades, candles, or orderbooks"
+// @Param        interval_seconds query     int64   false  "Candle interval in seconds (for candles, default 60)"
+// @Param        depth            query     int     false  "Order book depth (for orderbooks, default 10)"
+// @Success      200              {object}  object  "Array of trades, candles, or order book snapshots"
+// @Failure      400              {object}  map[string]string
+// @Failure      404              {object}  map[string]string
+// @Failure      500              {object}  map[string]string
+// @Router       /marketdata/range [get]
+func (h *Handler) getMarketDataRange(c *gin.Context) {
+	figi := c.Query("figi")
+	if figi == "" {
+		writeError(c, http.StatusBadRequest, errors.New("figi query param required"))
+		return
+	}
+	from, to, err := parseTimeRange(c)
+	if err != nil {
+		writeError(c, http.StatusBadRequest, errMissingRange)
+		return
+	}
+	dataType := c.Query("data_type")
+	if dataType == "" {
+		writeError(c, http.StatusBadRequest, errors.New("data_type query param required (trades, candles, or orderbooks)"))
+		return
+	}
+
+	inst, err := h.instruments.GetInstrumentByFigi(c.Request.Context(), figi)
+	if err != nil {
+		if errors.Is(err, infrainstruments.ErrInstrumentNotFound) {
+			writeError(c, http.StatusNotFound, err)
+			return
+		}
+		writeError(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	switch dataType {
+	case "trades":
+		trades, err := h.marketdata.GetTradesBetween(c.Request.Context(), inst.UID, from, to)
+		if err != nil {
+			writeError(c, http.StatusInternalServerError, err)
+			return
+		}
+		c.JSON(http.StatusOK, trades)
+	case "candles":
+		intervalSeconds := int64(60)
+		if v := c.Query("interval_seconds"); v != "" {
+			intervalSeconds, err = parseInt64Query(c, "interval_seconds")
+			if err != nil || intervalSeconds <= 0 {
+				writeError(c, http.StatusBadRequest, errors.New("interval_seconds must be positive"))
+				return
+			}
+		}
+		candles, err := h.marketdata.GetCandlesBetween(c.Request.Context(), inst.UID, intervalSeconds, from, to)
+		if err != nil {
+			writeError(c, http.StatusInternalServerError, err)
+			return
+		}
+		c.JSON(http.StatusOK, candles)
+	case "orderbooks":
+		depth := 10
+		if v := c.Query("depth"); v != "" {
+			depth, err = parseIntQuery(c, "depth")
+			if err != nil || depth <= 0 {
+				writeError(c, http.StatusBadRequest, errors.New("depth must be positive"))
+				return
+			}
+		}
+		snapshots, err := h.marketdata.GetOrderBookSnapshotsBetween(c.Request.Context(), inst.UID, int32(depth), from, to)
+		if err != nil {
+			writeError(c, http.StatusInternalServerError, err)
+			return
+		}
+		c.JSON(http.StatusOK, snapshots)
+	default:
+		writeError(c, http.StatusBadRequest, errors.New("data_type must be trades, candles, or orderbooks"))
 	}
 }
 
@@ -1362,8 +1453,9 @@ func parseInt64Query(c *gin.Context, key string) (int64, error) {
 }
 
 func parseTimeRange(c *gin.Context) (time.Time, time.Time, error) {
-	fromStr := c.Query("from")
-	toStr := c.Query("to")
+	query := c.Request.URL.Query()
+	fromStr := query.Get("from")
+	toStr := query.Get("to")
 	if fromStr == "" || toStr == "" {
 		return time.Time{}, time.Time{}, errMissingRange
 	}
