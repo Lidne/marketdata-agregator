@@ -1,4 +1,30 @@
 services:
+  agregator:
+    image: marketdata-agregator
+    container_name: agregator
+    restart: unless-stopped
+    environment:
+      - DATABASE_DSN=postgresql://postgres:test@timescaledb:5432/market_data
+      - INVEST_TOKEN=t.R0UYpK2-ZNZgpdyWuKWpcNrpyTMllXFUqP777_2fgRR8SZ-U_25BDMDT6xXRzXoyf_urJ6-bTm7yt3j-2z81WQ
+      - REDIS_ADDR=redis:6379
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
+    networks:
+      - main
+
+  producer:
+    image: marketdata-producer
+    container_name: producer
+    restart: unless-stopped
+    environment:
+      - DATABASE_DSN=postgresql://postgres:test@timescaledb:5432/market_data
+      - INVEST_TOKEN=t.R0UYpK2-ZNZgpdyWuKWpcNrpyTMllXFUqP777_2fgRR8SZ-U_25BDMDT6xXRzXoyf_urJ6-bTm7yt3j-2z81WQ
+      - REDIS_ADDR=redis:6379
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
+    volumes:
+      - ./cmd/producer/instruments.json:/cmd/producer/instruments:ro
+    networks:
+      - main
+
   timescaledb:
     image: timescale/timescaledb:latest-pg16
     container_name: timescaledb

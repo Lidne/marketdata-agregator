@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/joho/godotenv"
+	"gopkg.in/yaml.v3"
 )
 
 const (
@@ -137,6 +138,80 @@ func Load() (*Config, error) {
 			BatchSize:          batchSize,
 			BatchTimeout:       time.Duration(timeoutMS) * time.Millisecond,
 		},
+	}, nil
+}
+
+// StreamerConfig holds parameters for the historical replay streamer.
+type StreamerConfig struct {
+	From           time.Time
+	To             time.Time
+	Trades         bool
+	Candles        bool
+	Orders         bool
+	CandleInterval int64 // interval in seconds used when querying candles
+	OrderDepth     int32 // depth used when querying order book snapshots
+	Instruments    []string
+}
+
+// yamlStreamerConfig is the raw YAML representation of streamer config.
+type yamlStreamerConfig struct {
+	From           string   `yaml:"from"`
+	To             string   `yaml:"to"`
+	Trades         bool     `yaml:"trades"`
+	Candles        bool     `yaml:"candles"`
+	Orders         bool     `yaml:"orders"`
+	CandleInterval int64    `yaml:"candle_interval"`
+	OrderDepth     int32    `yaml:"order_depth"`
+	Instruments    []string `yaml:"instruments"`
+}
+
+type yamlRoot struct {
+	Streamer yamlStreamerConfig `yaml:"streamer"`
+}
+
+// LoadStreamerConfig reads streamer configuration from a YAML file.
+// Timestamps must be in RFC3339 format, e.g. "2024-01-01T00:00:00Z".
+func LoadStreamerConfig(path string) (*StreamerConfig, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil, fmt.Errorf("read config file %q: %w", path, err)
+	}
+
+	var root yamlRoot
+	if err := yaml.Unmarshal(data, &root); err != nil {
+		return nil, fmt.Errorf("parse config file %q: %w", path, err)
+	}
+
+	raw := root.Streamer
+
+	from, err := time.Parse(time.RFC3339, raw.From)
+	if err != nil {
+		return nil, fmt.Errorf("parse streamer.from %q: %w", raw.From, err)
+	}
+	to, err := time.Parse(time.RFC3339, raw.To)
+	if err != nil {
+		return nil, fmt.Errorf("parse streamer.to %q: %w", raw.To, err)
+	}
+	if from.After(to) {
+		from, to = to, from
+	}
+
+	if raw.CandleInterval <= 0 {
+		raw.CandleInterval = 60
+	}
+	if raw.OrderDepth <= 0 {
+		raw.OrderDepth = 20
+	}
+
+	return &StreamerConfig{
+		From:           from,
+		To:             to,
+		Trades:         raw.Trades,
+		Candles:        raw.Candles,
+		Orders:         raw.Orders,
+		CandleInterval: raw.CandleInterval,
+		OrderDepth:     raw.OrderDepth,
+		Instruments:    raw.Instruments,
 	}, nil
 }
 
